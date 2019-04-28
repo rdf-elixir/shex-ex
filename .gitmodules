@@ -1,3 +1,3 @@
-[submodule "test/shexTest"]
-	path = test/shexTest
+[submodule "test/data/shexTest"]
+	path = test/data/shexTest
 	url = https://github.com/shexSpec/shexTest.git
