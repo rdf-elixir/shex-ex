@@ -5,6 +5,9 @@ defmodule ShEx.NodeConstraint do
   alias RDF.NS.XSD
 
   @xsd_string XSD.string()
+  @node_kinds ~w[iri bnode nonliteral literal]
+
+  def node_kinds(), do: @node_kinds
 
   def satisfies?(node_constraint, node) do
     node_satisfies_node_kind_constraint?(node_constraint.node_kind, node) &&
