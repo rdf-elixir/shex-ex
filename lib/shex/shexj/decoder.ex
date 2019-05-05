@@ -48,16 +48,10 @@ defmodule ShEx.ShExJ.Decoder do
            node_constraint
            |> Map.get(:datatype)
            |> if_present(&to_iri/2, options),
-         {:ok, string_facets} <-
-           node_constraint
-           |> Map.get(:xsFacets, %{})
-           |> ShEx.NodeConstraint.StringFacets.new()
-           |> empty_to_nil(),
-         {:ok, numeric_facets} <-
-           node_constraint
-           |> Map.get(:xsFacets, %{})
-           |> ShEx.NodeConstraint.NumericFacets.new()
-           |> empty_to_nil(),
+         string_facets <-
+           ShEx.NodeConstraint.StringFacets.new(node_constraint),
+         numeric_facets <-
+           ShEx.NodeConstraint.NumericFacets.new(node_constraint),
          {:ok, values} <-
            node_constraint
            |> Map.get(:values, [])
@@ -182,7 +176,7 @@ defmodule ShEx.ShExJ.Decoder do
            |> if_present(&to_triple_expression_label/2, options),
          {:ok, value_expr} <-
            triple_constraint
-           |> Map.get(:value_expr)
+           |> Map.get(:valueExpr)
            |> if_present(&to_shape_expression/2, options),
          {:ok, predicate} <-
            to_iri(predicate, options),
@@ -397,7 +391,7 @@ defmodule ShEx.ShExJ.Decoder do
     end
   end
 
-  defp to_literal(%{value: value, datatype: datatype}, _options),
+  defp to_literal(%{value: value, type: datatype}, _options),
     do: {:ok, RDF.literal(value, datatype: datatype)}
 
   defp to_literal(%{value: value, language: language}, _options),
