@@ -13,29 +13,6 @@ defmodule ShEx.TestSuiteTest do
       end)
 
       [
-        "1literalPatternDollar",
-        "1literalPattern_with_all_meta",
-        "1literalPattern_with_all_punctuation",
-        "1literalPattern_with_REGEXP_escapes",
-        "1literalPattern_with_REGEXP_escapes_bare",
-        "1literalPattern_with_ascii_boundaries",
-        "1literalCarrotPatternDollar",
-        "1focusPattern-dot",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: Regex escaping issues"
-      end)
-
-      [
-        "1dotCodeWithEscapes1",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: Code escaping issues"
-      end)
-
-      [
         "FocusIRI2groupBnodeNested2groupIRIRef",
       ]
       |> Enum.each(fn test_subject ->

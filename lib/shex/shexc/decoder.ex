@@ -416,7 +416,7 @@ defmodule ShEx.ShExC.Decoder do
       {:ok,
        %ShEx.SemAct{
          name: name,
-         code: code
+         code: unescape_code(code)
        }}
     end
   end
@@ -449,7 +449,7 @@ defmodule ShEx.ShExC.Decoder do
   end
 
   defp xs_facet({:string_facet, :regexp, {{:regexp, _line, regexp}, nil}}, _state) do
-    {:ok, %{pattern: local_name_unescape(regexp)}}
+    {:ok, %{pattern: unescape_regex(regexp)}}
   end
 
   defp xs_facet({:string_facet, length_type, {:integer, _line, integer}}, _state) do
@@ -578,7 +578,7 @@ defmodule ShEx.ShExC.Decoder do
 
   defp build_node({:prefix_ln, line, {prefix, name}}, state) do
     if ns = State.ns(state, prefix) do
-      {:ok, RDF.iri(ns <> local_name_unescape(name))}
+      {:ok, RDF.iri(ns <> name)}
     else
       {:error, "unknown prefix #{inspect(prefix)} in line #{inspect(line)}"}
     end
@@ -606,12 +606,18 @@ defmodule ShEx.ShExC.Decoder do
     {:ok, IRI.absolute(relative_iri, base_iri)}
   end
 
-  defp local_name_unescape(string),
-    do: Macro.unescape_string(string, &local_name_unescape_map(&1))
+  defp unescape_code(nil), do: nil
+  defp unescape_code(string), do: Macro.unescape_string(string)
 
-  # TODO: update this copy from Turtle for ShExC
-  @reserved_characters ~c[~.-!$&'()*+,;=/?#@%_]
+  defp unescape_regex(nil), do: nil
+  defp unescape_regex(string),
+    do: string |> unescape_8digit_unicode_seq |> Macro.unescape_string(&regex_unescape_map(&1))
 
-  defp local_name_unescape_map(e) when e in @reserved_characters, do: e
-  defp local_name_unescape_map(_), do: false
+  defp regex_unescape_map(:unicode), do: true
+  defp regex_unescape_map(?/), do: ?\/
+  defp regex_unescape_map(_), do: false
+
+  def unescape_8digit_unicode_seq(string) do
+    String.replace(string, ~r/(?<!\\)\\U([0-9]|[A-F]|[a-f]){2}(([0-9]|[A-F]|[a-f]){6})/, "\\u{\\2}")
+  end
 end
