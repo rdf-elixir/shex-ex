@@ -13,17 +13,6 @@ defmodule ShEx.TestSuiteTest do
       end)
 
       [
-        "1double",
-        "1decimal",
-        "1float",
-        "1integer",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: We need to normalize to a fixed datatype as can not differentiate float and double in ShExJ"
-      end)
-
-      [
         "1literalPatternDollar",
         "1literalPattern_with_all_meta",
         "1literalPattern_with_all_punctuation",

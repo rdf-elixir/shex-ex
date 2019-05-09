@@ -9,7 +9,7 @@ defmodule ShEx.NodeConstraint.NumericFacets do
     xs_facets_with_literals =
       Map.new(xs_facets, fn
         {key, value} when key in ~w[mininclusive minexclusive maxinclusive maxexclusive]a ->
-          {key, RDF.Literal.new(value)}
+          {key, value |> RDF.Decimal.new() |> Literal.canonical()}
         {key, value} ->
           {key, value}
       end)
