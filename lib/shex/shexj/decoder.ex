@@ -1,4 +1,6 @@
 defmodule ShEx.ShExJ.Decoder do
+  import ShEx.Utils
+
   def decode(content, options \\ []) do
     with {:ok, json_object} <- parse_json(content, options) do
       to_schema(json_object, options)
@@ -273,7 +275,6 @@ defmodule ShEx.ShExJ.Decoder do
     {:error, "invalid triple expression: #{inspect(invalid)}}"}
   end
 
-  # TODO: the spec says IRI - is this different from IRIREF?
   defp to_import(iri, options) when is_binary(iri),
     do: to_iri(iri, options)
 
@@ -366,6 +367,18 @@ defmodule ShEx.ShExJ.Decoder do
     end
   end
 
+  defp to_value_set_value(%{type: "Language", languageTag: language_tag} = language, _) do
+    {:ok, language}
+  end
+
+  defp to_value_set_value(%{type: type} = stem, _) when type in ~w[LanguageStem LiteralStem] do
+    {:ok, stem}
+  end
+
+  defp to_value_set_value(%{exclusions: _} = stem_range, options) do
+    {:ok, stem_range}
+  end
+
   defp to_value_set_value(invalid, _) do
     {:error, "invalid value set value: #{inspect(invalid)}}"}
   end
@@ -414,32 +427,6 @@ defmodule ShEx.ShExJ.Decoder do
 
   defp to_bool(invalid, _),
     do: {:error, "invalid boolean: #{inspect(invalid)}}"}
-
-  defp map(list, fun, options) do
-    list
-    |> Enum.reverse()
-    |> Stream.map(fn element -> fun.(element, options) end)
-    |> Enum.reduce({:ok, []}, fn
-      {:ok, element}, {:ok, elements} ->
-        {:ok, [element | elements]}
-
-      {:ok, _}, {:error, errors} ->
-        {:error, errors}
-
-      {:error, errors}, {:ok, _} ->
-        {:error, errors}
-
-      {:error, new_errors}, {:error, previous_errors} ->
-        {:error, List.wrap(new_errors) ++ List.wrap(previous_errors)}
-    end)
-  end
-
-  defp empty_to_nil({:ok, []}), do: {:ok, nil}
-  defp empty_to_nil(nil), do: {:ok, nil}
-  defp empty_to_nil(list), do: list
-
-  defp if_present(nil, _, _), do: {:ok, nil}
-  defp if_present(value, fun, options), do: fun.(value, options)
 
   defp parse_json(content, _opts \\ []) do
     Jason.decode(content, keys: :atoms!)

@@ -4,6 +4,7 @@ defmodule ShEx.NodeConstraint.Values do
   alias RDF.{IRI, Literal}
 
   @wildcard %{type: "Wildcard"}
+  def wildcard(), do: @wildcard
 
   def satisfies?(nil, _), do: true
 
@@ -14,6 +15,9 @@ defmodule ShEx.NodeConstraint.Values do
 
       %Literal{} = literal ->
         node == literal
+
+      %{type: "Language", languageTag: ""} ->
+        not is_nil(node.language)
 
       %{type: "Language", languageTag: language_tag} ->
         match? %Literal{language: ^language_tag}, node

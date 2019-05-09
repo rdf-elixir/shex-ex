@@ -10,7 +10,8 @@ defmodule ShEx.NodeConstraint.NumericFacets do
       Map.new(xs_facets, fn
         {key, value} when key in ~w[mininclusive minexclusive maxinclusive maxexclusive]a ->
           {key, RDF.Literal.new(value)}
-        {key, value} -> {key, value}
+        {key, value} ->
+          {key, value}
       end)
     numeric_facets = struct(__MODULE__, xs_facets_with_literals)
     if %__MODULE__{} != numeric_facets do

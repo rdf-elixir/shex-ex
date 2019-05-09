@@ -11,6 +11,7 @@ defmodule ShEx.NodeConstraintTest do
   @example_iri RDF.iri("http://example.com/")
   @example_string RDF.string("http://example.com/")
   @example_integer RDF.integer(42)
+  @example_decimal RDF.decimal(3.14)
 
   describe "satisfies?/2" do
     test "iri node kind constraint" do
@@ -136,6 +137,11 @@ defmodule ShEx.NodeConstraintTest do
         {@example_integer, %{fractiondigits: 0}, true},
         {@example_integer, %{fractiondigits: 3}, false},
 
+        {@example_decimal, %{mininclusive: Decimal.from_float(3.14)}, true},
+        {@example_decimal, %{minexclusive: Decimal.from_float(3.14)}, false},
+        {@example_decimal, %{totaldigits: 1}, true},
+        {@example_decimal, %{fractiondigits: 2}, true},
+
         {@example_string,  %{mininclusive: 1}, nil},
         {RDF.false,        %{maxinclusive: 1}, nil},
         {RDF.true,         %{minexclusive: 1}, nil},
@@ -160,6 +166,8 @@ defmodule ShEx.NodeConstraintTest do
 
         {~L"foo"en, [%{type: "Language", languageTag: "en"}], true},
         {~L"foo"en, [%{type: "Language", languageTag: "de"}], false},
+        {~L"foo"en, [%{type: "Language", languageTag: ""}], true},
+        {~L"foo",   [%{type: "Language", languageTag: ""}], false},
 
         {@example_iri, [%{type: "IriStem", stem: @example_iri}], true},
         {RDF.iri("http://example.com/foo"), [%{type: "IriStem", stem: @example_iri}], true},

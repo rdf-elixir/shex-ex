@@ -105,7 +105,7 @@ Rules.
 
 {CODE}                      : {token, {code, TokenLine, code_str(TokenChars)}}.
 {LANGTAG}                   : {token, {langtag, TokenLine, langtag_str(TokenChars)}}.
-{RDFTYPE}                   : {token, {iriref,  TokenLine, quoted_content_str("http://www.w3.org/1999/02/22-rdf-syntax-ns#")}}.
+{RDFTYPE}                   : {token, {iriref,  TokenLine, quoted_content_str("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>")}}.
 {IRIREF}                    : {token, {iriref,  TokenLine, quoted_content_str(TokenChars)}}.
 {DOUBLE}                    : {token, {double, TokenLine, double(TokenChars)}}.
 {DECIMAL}                   : {token, {decimal, TokenLine, decimal(TokenChars)}}.
@@ -113,7 +113,7 @@ Rules.
 {BOOLEAN}                   : {token, {boolean, TokenLine, boolean(TokenChars)}}.
 {REPEAT_RANGE}							: {token, {repeat_range, TokenLine, repeat_range(TokenChars)}}.
 {REGEXP}										: {token, {regexp, TokenLine, regexp_str(TokenChars)}}.
-{REGEXP_FLAGS}		   				: {token, {regexp, TokenLine, regexp_flags_str(TokenChars)}}.
+{REGEXP_FLAGS}		   				: {token, {regexp_flags, TokenLine, regexp_flags_str(TokenChars)}}.
 {STRING_LITERAL_1}          : {token, {string_literal_quote, TokenLine, quoted_content_str(TokenChars)}}.
 {STRING_LITERAL_2}          : {token, {string_literal_quote, TokenLine, quoted_content_str(TokenChars)}}.
 {STRING_LITERAL_LONG1}      : {token, {string_literal_quote, TokenLine, long_quoted_content_str(TokenChars)}}.
@@ -125,8 +125,8 @@ Rules.
 {BLANK_NODE_LABEL}          : {token, {blank_node_label, TokenLine, bnode_str(TokenChars)}}.
 {PNAME_NS}                  : {token, {prefix_ns, TokenLine, prefix_ns(TokenChars)}}.
 {PNAME_LN}                  : {token, {prefix_ln, TokenLine, prefix_ln(TokenChars)}}.
-{ATPNAME_NS}                : {token, {at_prefix_ns, TokenLine, prefix_ns(TokenChars)}}.
-{ATPNAME_LN}                : {token, {at_prefix_ln, TokenLine, prefix_ln(TokenChars)}}.
+{ATPNAME_NS}                : {token, {at_prefix_ns, TokenLine, at_prefix_ns(TokenChars)}}.
+{ATPNAME_LN}                : {token, {at_prefix_ln, TokenLine, at_prefix_ln(TokenChars)}}.
 ; 	                        : {token, {';', TokenLine}}.
 \.	                        : {token, {'.', TokenLine}}.
 \[	                        : {token, {'[', TokenLine}}.
@@ -165,10 +165,12 @@ bnode_str(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':bnode_str(TokenC
 langtag_str(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':langtag_str(TokenChars).
 prefix_ns(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':prefix_ns(TokenChars).
 prefix_ln(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':prefix_ln(TokenChars).
+at_prefix_ns(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':prefix_ns(string:slice(TokenChars,1)).
+at_prefix_ln(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':prefix_ln(string:slice(TokenChars,1)).
 
 lang_quoted_content_str(TokenChars) -> 'Elixir.ShEx.ShExC.ParseHelper':lang_quoted_content_str(TokenChars).
 lang_long_quoted_content_str(TokenChars) -> 'Elixir.ShEx.ShExC.ParseHelper':lang_long_quoted_content_str(TokenChars).
 code_str(TokenChars) -> 'Elixir.ShEx.ShExC.ParseHelper':code_str(TokenChars).
 repeat_range(TokenChars) -> 'Elixir.ShEx.ShExC.ParseHelper':repeat_range(TokenChars).
-regexp_str(TokenChars) -> 'Elixir.ShEx.ShExC.ParseHelper':to_str(TokenChars).
+regexp_str(TokenChars) -> 'Elixir.RDF.Serialization.ParseHelper':quoted_content_str(TokenChars).
 regexp_flags_str(TokenChars) -> 'Elixir.ShEx.ShExC.ParseHelper':to_str(TokenChars).

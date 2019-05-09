@@ -15,8 +15,8 @@ defmodule ShEx.ShExC.ParseHelper do
     end
   end
 
-  defp range_member(""), do: "*"
-  defp range_member("*"), do: "*"
+  defp range_member(""), do: -1
+  defp range_member("*"), do: -1
   defp range_member(value), do: String.to_integer(value)
 
   def to_str(value), do: List.to_string(value)
