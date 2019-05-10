@@ -374,14 +374,18 @@ defmodule ShEx.ShExC.Decoder do
            if_present(datatype_ast, &build_node/2, state),
          {:ok, xs_facets} <-
            xs_facets(xs_facets_ast, Map.put(state, :current_xs_facet_datatype, datatype)),
+         string_facets <-
+           StringFacets.new(xs_facets),
+         {:ok, numeric_facets} <-
+           xs_facets |> NumericFacets.new() |> validate_numeric_datatype(datatype),
          {:ok, values} <-
            if_present(value_set_ast, &value_set/2, state) do
       {:ok,
        %ShEx.NodeConstraint{
          node_kind: if(kind, do: to_string(kind)),
          datatype: datatype,
-         string_facets: StringFacets.new(xs_facets),
-         numeric_facets: NumericFacets.new(xs_facets),
+         string_facets: string_facets,
+         numeric_facets: numeric_facets,
          values: values
        }}
     end
@@ -440,8 +444,14 @@ defmodule ShEx.ShExC.Decoder do
     |> List.wrap()
     |> Enum.reduce_while({:ok, %{}}, fn xs_facet_ast, {:ok, xs_facets} ->
       case xs_facet(xs_facet_ast, state) do
-        {:ok, xs_facet} -> {:cont, {:ok, Map.merge(xs_facets, xs_facet)}}
-        {:error, _} = error -> {:halt, error}
+        {:ok, xs_facet} ->
+          if (conflicts = Map.take(xs_facets, Map.keys(xs_facet))) == %{} do
+            {:cont, {:ok, Map.merge(xs_facets, xs_facet)}}
+          else
+            {:halt, {:error, "multiple occurrences of the same xsFacet: #{conflicts |> Map.keys |> Enum.join(", ")}}"}}
+          end
+        {:error, _} = error ->
+          {:halt, error}
       end
     end)
   end
@@ -453,7 +463,9 @@ defmodule ShEx.ShExC.Decoder do
   end
 
   defp xs_facet({:string_facet, :regexp, {{:regexp, _line, regexp}, nil}}, _state) do
-    {:ok, %{pattern: unescape_regex(regexp)}}
+    with {:ok, regexp} <- valid_regexp_escaping(regexp) do
+      {:ok, %{pattern: unescape_regex(regexp)}}
+    end
   end
 
   defp xs_facet({:string_facet, length_type, {:integer, _line, integer}}, _state) do
@@ -466,6 +478,17 @@ defmodule ShEx.ShExC.Decoder do
 
   defp xs_facet({:numeric_range_facet, numeric_range_type, numeric}, _state) do
     {:ok, %{numeric_range_type => numeric.value}}
+  end
+
+  defp validate_numeric_datatype(nil, _), do: {:ok, nil}
+  defp validate_numeric_datatype(numeric_facets, nil), do: {:ok, numeric_facets}
+
+  defp validate_numeric_datatype(numeric_facets, datatype) do
+    if RDF.Numeric.type?(datatype) do
+      {:ok, numeric_facets}
+    else
+      {:error, "numeric facet constraints applied to non-numeric datatype: #{to_string datatype}}"}
+    end
   end
 
   defp value_set({:value_set, value_set_values_ast}, state) do
@@ -580,6 +603,8 @@ defmodule ShEx.ShExC.Decoder do
   defp build_node(%BlankNode{} = bnode, _state), do: {:ok, bnode}
   defp build_node(%Literal{} = literal, _state), do: {:ok, literal}
 
+  defp build_node(:rdf_type, _state), do: {:ok, RDF.type}
+
   defp build_node({:prefix_ln, line, {prefix, name}}, state) do
     if ns = State.ns(state, prefix) do
       {:ok, RDF.iri(ns <> name)}
@@ -608,6 +633,10 @@ defmodule ShEx.ShExC.Decoder do
 
   defp build_node({:relative_iri, relative_iri}, %State{base_iri: base_iri}) do
     {:ok, IRI.absolute(relative_iri, base_iri)}
+  end
+
+  defp valid_regexp_escaping(regexp) do
+    {:ok, regexp}
   end
 
   defp unescape_code(nil), do: nil

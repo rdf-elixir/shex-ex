@@ -19,7 +19,7 @@ Nonterminals shexDoc directives directive statements statement
   predicate numericLiteral rdfLiteral booleanLiteral iri prefixedName blankNode.
 
 Terminals prefix_ns prefix_ln at_prefix_ns at_prefix_ln iriref blank_node_label code regexp regexp_flags
-  string_literal_quote lang_string_literal_quote langtag integer decimal double boolean repeat_range
+  string_literal_quote lang_string_literal_quote langtag integer decimal double boolean repeat_range rdf_type
   '.' ';' '[' ']' '(' ')' '{' '}' '^^' '^' '=' '@' '$' '|' '&' '?' '*' '+' '-' '~' '//' '%'
   'AND' 'OR' 'NOT' 'PREFIX' 'BASE' 'IMPORT' 'START' 'EXTERNAL'
   'LITERAL' 'IRI' 'BNODE' 'NONLITERAL' 'LENGTH' 'MINLENGTH' 'MAXLENGTH'
@@ -297,6 +297,7 @@ literal -> numericLiteral : '$1' .
 literal -> booleanLiteral : '$1' .
 
 predicate -> iri : '$1' .
+predicate -> rdf_type : rdf_type .
 
 datatype -> iri : '$1' .
 

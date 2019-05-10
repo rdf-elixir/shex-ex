@@ -35,4 +35,20 @@ defmodule ShEx.TestSuiteTest do
       end
     end)
   end
+
+  describe "negativeSyntax" do
+    # These tests violate the ShEx2 grammar
+    TestSuite.test_cases("negativeSyntax")
+    |> Enum.each(fn test_case ->
+      @tag test_case: test_case
+      test TestSuite.test_case_title(test_case), %{test_case: test_case} do
+        assert {:error, _} =
+                 test_case
+                 |> ShEx.TestSuite.test_case_file(:shex)
+                 |> ShEx.TestSuite.file()
+                 |> File.read!()
+                 |> ShEx.ShExC.Decoder.decode()
+      end
+    end)
+  end
 end

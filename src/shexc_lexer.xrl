@@ -31,8 +31,8 @@ INTEGER	  =	[+-]?[0-9]+
 DECIMAL	  =	[+-]?[0-9]*\.[0-9]+
 DOUBLE	  =	[+-]?([0-9]+\.[0-9]*{EXPONENT}|\.?[0-9]+{EXPONENT})
 
-REGEXP = \/([^/\\\n\r]|\\[nrt\\|.?*+(){}$-\[\]^/]|{UCHAR})+\/
-REGEXP_FLAGS = [smix]*
+REGEXP = \/([^/\n\r\\]|\\[/nrt\\|.?*+(){}\[\]$^-]|{UCHAR})+\/
+REGEXP_FLAGS = [smix]+
 
 REPEAT_RANGE = \{{INTEGER}(,({INTEGER}|\*)?)?\}
 
@@ -41,7 +41,6 @@ LANGTAG	=	@[a-zA-Z]+(-[a-zA-Z0-9]+)*
 CODE = \{([^%\\]|\\[%\\]|{UCHAR})*%\}
 
 IRIREF = <([^\x00-\x20<>"{}|^`\\]|{UCHAR})*>
-RDFTYPE = a
 BLANK_NODE_LABEL = _:({PN_CHARS_U}|[0-9])(({PN_CHARS}|\.)*({PN_CHARS}))?
 STRING_LITERAL_1           = "([^"\\\n\r]|{ECHAR}|{UCHAR})*"
 STRING_LITERAL_2           =	'([^'\\\n\r]|{ECHAR}|{UCHAR})*'
@@ -105,7 +104,6 @@ Rules.
 
 {CODE}                      : {token, {code, TokenLine, code_str(TokenChars)}}.
 {LANGTAG}                   : {token, {langtag, TokenLine, langtag_str(TokenChars)}}.
-{RDFTYPE}                   : {token, {iriref,  TokenLine, quoted_content_str("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>")}}.
 {IRIREF}                    : {token, {iriref,  TokenLine, quoted_content_str(TokenChars)}}.
 {DOUBLE}                    : {token, {double, TokenLine, double(TokenChars)}}.
 {DECIMAL}                   : {token, {decimal, TokenLine, decimal(TokenChars)}}.
@@ -123,6 +121,7 @@ Rules.
 {LANG_STRING_LITERAL_LONG1} : {token, {lang_string_literal_quote, TokenLine, lang_long_quoted_content_str(TokenChars)}}.
 {LANG_STRING_LITERAL_LONG2} : {token, {lang_string_literal_quote, TokenLine, lang_long_quoted_content_str(TokenChars)}}.
 {BLANK_NODE_LABEL}          : {token, {blank_node_label, TokenLine, bnode_str(TokenChars)}}.
+a                           : {token, {rdf_type, TokenLine}}.
 {PNAME_NS}                  : {token, {prefix_ns, TokenLine, prefix_ns(TokenChars)}}.
 {PNAME_LN}                  : {token, {prefix_ln, TokenLine, prefix_ln(TokenChars)}}.
 {ATPNAME_NS}                : {token, {at_prefix_ns, TokenLine, at_prefix_ns(TokenChars)}}.
