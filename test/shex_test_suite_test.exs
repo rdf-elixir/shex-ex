@@ -5,14 +5,6 @@ defmodule ShEx.TestSuiteTest do
     TestSuite.test_cases("schemas")
     |> Enum.each(fn test_case ->
       [
-        "_all",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO:"
-      end)
-
-      [
         "FocusIRI2groupBnodeNested2groupIRIRef",
       ]
       |> Enum.each(fn test_subject ->

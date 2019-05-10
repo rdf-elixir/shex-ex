@@ -14,10 +14,6 @@ defmodule ShEx.ShExC.Decoder do
     def ns(%State{namespaces: namespaces}, prefix) do
       namespaces[prefix]
     end
-
-    def next_bnode(%State{bnode_counter: bnode_counter} = state) do
-      {RDF.bnode("b#{bnode_counter}"), %State{state | bnode_counter: bnode_counter + 1}}
-    end
   end
 
   def decode(content, opts \\ []) do
@@ -51,14 +47,15 @@ defmodule ShEx.ShExC.Decoder do
 
   defp build_schema({:shex_doc, directives_ast, start_acts_ast, statements_ast}, base) do
     with state = %State{},
-         {:ok, statements, state} <-
-           extract_prefixes(directives_ast ++ statements_ast, state),
+         all_statements = directives_ast ++ statements_ast,
          {:ok, statements, imports} <-
-           extract_imports(statements, state),
-         {:ok, start_acts} <-
-           if_present(start_acts_ast, &build_semantic_actions/2, state),
+           extract_imports(all_statements, state),
          {:ok, statements, start} <-
            extract_start(statements, state),
+         {:ok, statements, state} <-
+           extract_prefixes(statements, state),
+         {:ok, start_acts} <-
+           if_present(start_acts_ast, &build_semantic_actions/2, state),
          {:ok, shapes, _state} <-
            Enum.reduce_while(statements, {:ok, [], state}, fn statement, {:ok, shapes, state} ->
              case build_shape(statement, state) do
@@ -77,42 +74,59 @@ defmodule ShEx.ShExC.Decoder do
     end
   end
 
-  defp handle_base({:base, iri}, %State{base_iri: base_iri} = state) do
-    cond do
-      IRI.absolute?(iri) ->
-        %State{state | base_iri: RDF.iri(iri)}
+  defp extract_prefixes(statements_ast, state) do
+    {statements, _, state} =
+      Enum.reduce(statements_ast, {[], :consume_directives, state}, &(handle_base_and_prefixes/2))
 
-      base_iri != nil ->
-        %State{state | base_iri: IRI.absolute(iri, base_iri)}
-
-      true ->
-        raise "Could not resolve relative IRI '#{iri}', no base iri provided"
-    end
+    {:ok, statements, state}
   end
 
-  defp handle_base(_, state), do: state
+  def handle_base_and_prefixes({:prefix, {:prefix_ns, _, ns}, iri} = directive, {statements, value, state}) do
+    {
+      if value == :consume_directives do
+        statements
+      else
+        statements ++ [directive]
+      end,
 
-  defp extract_prefixes(statements_ast, %State{base_iri: original_base_iri} = state) do
-    {statements, state} =
-      Enum.reduce(statements_ast, {[], state}, fn
-        {:prefix, {:prefix_ns, _, ns}, iri}, {statements, state} ->
-          {statements,
-           if IRI.absolute?(iri) do
-             State.add_namespace(state, ns, iri)
-           else
-             with absolute_iri = IRI.absolute(iri, state.base_iri) do
-               State.add_namespace(state, ns, to_string(absolute_iri))
-             end
-           end}
+      value,
 
-        {:base, _iri} = directive, {statements, state} ->
-          {statements ++ [directive], handle_base(directive, state)}
+      if IRI.absolute?(iri) do
+        State.add_namespace(state, ns, iri)
+      else
+        with absolute_iri = IRI.absolute(iri, state.base_iri) do
+          State.add_namespace(state, ns, to_string(absolute_iri))
+        end
+      end
+    }
+  end
 
-        statement, {statements, state} ->
-          {statements ++ [statement], state}
-      end)
+  def handle_base_and_prefixes({:base, iri} = directive,
+        {statements, value, %State{base_iri: base_iri} = state}) do
+    {
+      if value == :consume_directives do
+        statements
+      else
+        statements ++ [directive]
+      end,
 
-    {:ok, statements, %State{state | base_iri: original_base_iri}}
+      value,
+
+      cond do
+        IRI.absolute?(iri) ->
+          %State{state | base_iri: RDF.iri(iri)}
+
+        base_iri != nil ->
+          %State{state | base_iri: IRI.absolute(iri, base_iri)}
+
+        true ->
+          raise "Could not resolve relative IRI '#{iri}', no base iri provided"
+      end
+    }
+  end
+
+  def handle_base_and_prefixes(statement, {statements, value, state}) do
+    {statements ++ [statement], value, state}
   end
 
   defp extract_imports(statements_ast, %State{} = state) do
@@ -131,11 +145,8 @@ defmodule ShEx.ShExC.Decoder do
              | imports
            ], state}
 
-        {:base, _} = directive, {statements, imports, state} ->
-          {statements ++ [directive], imports, handle_base(directive, state)}
-
-        statement, {statements, imports, state} ->
-          {statements ++ [statement], imports, state}
+        statement, acc ->
+          handle_base_and_prefixes(statement, acc)
       end)
 
     {:ok, statements, Enum.reverse(imports)}
@@ -154,11 +165,8 @@ defmodule ShEx.ShExC.Decoder do
              {:start, _inline_shape_expression}, {_statements, _start, _state} ->
                {:halt, {:error, "multiple start shapes defined"}}
 
-             {:base, _iri} = directive, {statements, start, state} ->
-               {:cont, {statements ++ [directive], start, handle_base(directive, state)}}
-
-             statement, {statements, start, state} ->
-               {:cont, {statements ++ [statement], start, state}}
+             statement, acc ->
+               {:cont, handle_base_and_prefixes(statement, acc)}
            end) do
       {:ok, statements, start}
     end
@@ -175,10 +183,6 @@ defmodule ShEx.ShExC.Decoder do
          {:ok, shape_expr_label} <- build_node(label_ast, state) do
       {:ok, Map.put(shape_expr, :id, shape_expr_label), state}
     end
-  end
-
-  defp build_shape({:base, _} = base_ast, state) do
-    {:ok, nil, handle_base(base_ast, state)}
   end
 
   defp build_shape_expression(
