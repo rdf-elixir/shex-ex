@@ -65,12 +65,13 @@ defmodule ShEx.ShExC.Decoder do
              end
            end) do
       {:ok,
-       %ShEx.Schema{
-         shapes: unless(Enum.empty?(shapes), do: Enum.reverse(shapes)),
-         start: start,
-         imports: unless(Enum.empty?(imports), do: imports),
-         start_acts: start_acts
-       }}
+        ShEx.Schema.new(
+          unless(Enum.empty?(shapes), do: Enum.reverse(shapes)),
+          start,
+          unless(Enum.empty?(imports), do: imports),
+          start_acts
+        )
+       }
     end
   end
 
