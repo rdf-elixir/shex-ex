@@ -46,7 +46,7 @@ defmodule ShEx.ShExC.Decoder do
   def parse(tokens), do: tokens |> :shexc_parser.parse()
 
   defp build_schema({:shex_doc, directives_ast, start_acts_ast, statements_ast}, base) do
-    with state = %State{},
+    with state = %State{base_iri: base},
          all_statements = directives_ast ++ statements_ast,
          {:ok, statements, imports} <-
            extract_imports(all_statements, state),
@@ -386,7 +386,7 @@ defmodule ShEx.ShExC.Decoder do
          datatype: datatype,
          string_facets: string_facets,
          numeric_facets: numeric_facets,
-         values: values
+         values: ShEx.NodeConstraint.Values.new(values)
        }}
     end
   end

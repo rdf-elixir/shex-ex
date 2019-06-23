@@ -66,7 +66,7 @@ defmodule ShEx.ShExJ.Decoder do
          datatype: datatype,
          string_facets: string_facets,
          numeric_facets: numeric_facets,
-         values: values
+         values: ShEx.NodeConstraint.Values.new(values)
        }}
     end
   end

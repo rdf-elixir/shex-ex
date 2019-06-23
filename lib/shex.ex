@@ -1,18 +1,13 @@
 defmodule ShEx do
   @moduledoc """
-  Documentation for ShEx.
+  TODO: Documentation for ShEx.
   """
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> ShEx.hello()
-      :world
 
   """
-  def hello do
-    :world
+  def validate(data, schema, shape_map, opts \\ []) do
+    ShEx.Schema.validate(schema, data, shape_map, opts)
   end
+
 end
