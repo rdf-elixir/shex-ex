@@ -10,9 +10,9 @@ defmodule ShEx.OneOf do
 
   import ShEx.TripleExpression.Shared
 
-  def matches(one_of, triples, graph, schema, association, shape_map) do
+  def matches(one_of, triples, graph, schema, association, shape_map, ref_stack) do
     with {matched, remainder, match_count} <-
-           find_matches(triples, one_of, graph, schema, association, shape_map),
+           find_matches(triples, one_of, graph, schema, association, shape_map, ref_stack),
          :ok <-
            check_cardinality(match_count, one_of.min || 1, one_of)
     do
@@ -23,23 +23,23 @@ defmodule ShEx.OneOf do
     end
   end
 
-  defp find_matches(triples, one_of, graph, schema, association, shape_map) do
+  defp find_matches(triples, one_of, graph, schema, association, shape_map, ref_stack) do
     do_find_matches({:ok, [], triples, 0},
-      one_of.expressions, one_of.max || 1, graph, schema, association, shape_map)
+      one_of.expressions, one_of.max || 1, graph, schema, association, shape_map, ref_stack)
   end
 
-  defp do_find_matches({:ok, matched, remainder, max}, _, max, _, _, _, _),
+  defp do_find_matches({:ok, matched, remainder, max}, _, max, _, _, _, _, _),
     do: {matched, remainder, max}
 
   defp do_find_matches({:ok, matched, remainder, match_count},
-         expressions, max, graph, schema, association, shape_map) do
+         expressions, max, graph, schema, association, shape_map, ref_stack) do
     expressions
     |> Enum.reduce_while({matched, remainder, match_count}, fn
         expression, {matched, remainder, match_count} ->
           with {:ok, new_matched, new_remainder} <-
                  expression
                  |> triple_expression()
-                 |> ShEx.TripleExpression.matches(remainder, graph, schema, association, shape_map)
+                 |> ShEx.TripleExpression.matches(remainder, graph, schema, association, shape_map, ref_stack)
           do
             {:halt, {:ok, new_matched, new_remainder, match_count + 1}}
           else
@@ -48,15 +48,15 @@ defmodule ShEx.OneOf do
               {:cont, {matched, remainder, match_count}}
           end
     end)
-    |> do_find_matches(expressions, max, graph, schema, association, shape_map)
+    |> do_find_matches(expressions, max, graph, schema, association, shape_map, ref_stack)
   end
 
-  defp do_find_matches(acc, _, _, _, _, _, _), do: acc
+  defp do_find_matches(acc, _, _, _, _, _, _, _), do: acc
 
 
   defimpl ShEx.TripleExpression do
-    def matches(one_of, triples, graph, schema, association, shape_map) do
-      ShEx.OneOf.matches(one_of, triples, graph, schema, association, shape_map)
+    def matches(one_of, triples, graph, schema, association, shape_map, ref_stack) do
+      ShEx.OneOf.matches(one_of, triples, graph, schema, association, shape_map, ref_stack)
     end
 
     def predicates(one_of),

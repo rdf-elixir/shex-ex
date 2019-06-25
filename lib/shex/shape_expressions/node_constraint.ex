@@ -60,7 +60,7 @@ defmodule ShEx.NodeConstraint do
   end
 
   defimpl ShEx.ShapeExpression do
-    def satisfies(node_constraint, _, _, association, _) do
+    def satisfies(node_constraint, _, _, association, _, _) do
       ShEx.NodeConstraint.satisfies(node_constraint, association)
     end
   end

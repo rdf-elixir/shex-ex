@@ -6,7 +6,7 @@ defprotocol ShEx.TripleExpression do
   @doc """
   Asserts that a triple expression is matched by a set of triples that come from the neighbourhood of a node in an RDF graph.
   """
-  def matches(triple_expression, triples, graph, schema, association, shape_map)
+  def matches(triple_expression, triples, graph, schema, association, shape_map, ref_stack)
 
   def predicates(triple_expression)
 

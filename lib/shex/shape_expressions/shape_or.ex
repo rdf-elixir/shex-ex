@@ -5,11 +5,11 @@ defmodule ShEx.ShapeOr do
   ]
 
   defimpl ShEx.ShapeExpression do
-    def satisfies(shape_or, graph, schema, association, shape_map) do
+    def satisfies(shape_or, graph, schema, association, shape_map, ref_stack) do
       shape_or.shape_exprs
       |> Enum.reduce_while({[], []}, fn expression, {reasons, app_infos} ->
            with %{status: :conformant} <-
-                  ShEx.ShapeExpression.satisfies(expression, graph, schema, association, shape_map)
+                  ShEx.ShapeExpression.satisfies(expression, graph, schema, association, shape_map, ref_stack)
            do
              {:halt, :ok}
            else

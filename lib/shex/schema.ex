@@ -35,7 +35,7 @@ defmodule ShEx.Schema do
          |> ShapeMap.add(
               schema
               |> shape_expr_with_id(association.shape)
-              |> ShapeExpression.satisfies(data, schema, association, shape_map)
+              |> ShapeExpression.satisfies(data, schema, association, shape_map, [])
             )
        end)
   end

@@ -16,23 +16,23 @@ defmodule ShEx.TripleConstraint do
 
 
   def matches(%__MODULE__{inverse: true} = triple_constraint, {arcs_in, arcs_out},
-        graph, schema, association, shape_map) do
+        graph, schema, association, shape_map, ref_stack) do
     with {:ok, matched, remainder} <-
-           matches(triple_constraint, arcs_in, graph, schema, association, shape_map) do
+           matches(triple_constraint, arcs_in, graph, schema, association, shape_map, ref_stack) do
       {:ok, matched, {remainder, arcs_out}}
     end
   end
 
-  def matches(triple_constraint, {arcs_in, arcs_out}, graph, schema, association, shape_map) do
+  def matches(triple_constraint, {arcs_in, arcs_out}, graph, schema, association, shape_map, ref_stack) do
     with {:ok, matched, remainder} <-
-           matches(triple_constraint, arcs_out, graph, schema, association, shape_map) do
+           matches(triple_constraint, arcs_out, graph, schema, association, shape_map, ref_stack) do
       {:ok, matched, {arcs_in, remainder}}
     end
   end
 
-  def matches(triple_constraint, triples, graph, schema, association, shape_map) do
+  def matches(triple_constraint, triples, graph, schema, association, shape_map, ref_stack) do
     with {matched, mismatched, remainder} <-
-           find_matches(triples, triple_constraint, graph, schema, association, shape_map),
+           find_matches(triples, triple_constraint, graph, schema, association, shape_map, ref_stack),
          :ok <-
            check_cardinality(length(matched), triple_constraint.min || 1, triple_constraint)
     do
@@ -43,14 +43,14 @@ defmodule ShEx.TripleConstraint do
     end
   end
 
-  defp find_matches(triples, triple_constraint, graph, schema, association, shape_map) do
+  defp find_matches(triples, triple_constraint, graph, schema, association, shape_map, ref_stack) do
     do_find_matches(
       {[], [], triples},
       triple_constraint.value_expr,
       triple_constraint.predicate,
       triple_constraint.inverse,
       triple_constraint.max || 1,
-      {graph, schema, association, shape_map}
+      {graph, schema, association, shape_map, ref_stack}
     )
   end
 
@@ -72,7 +72,7 @@ defmodule ShEx.TripleConstraint do
   defp do_find_matches(
          {matched, mismatched, [{subject, predicate, object} = statement | remainder]},
          value_expr, predicate, inverse, max,
-         {graph, schema, association, shape_map} = match_context) do
+         {graph, schema, association, shape_map, ref_stack} = match_context) do
       value = if inverse, do: subject, else: object
 
       with %{status: :conformant} <-
@@ -81,7 +81,8 @@ defmodule ShEx.TripleConstraint do
                graph,
                schema,
                ShEx.ShapeMap.Association.new(value, value_expr),
-               shape_map)
+               shape_map,
+               ref_stack)
       do
         {[statement | matched], mismatched, remainder}
       else

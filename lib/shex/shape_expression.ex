@@ -3,5 +3,5 @@ defprotocol ShEx.ShapeExpression do
   A shape expression is a logical combination of node constraints and shapes.
   """
 
-  def satisfies(shape_expression, graph, schema, association, shape_map)
+  def satisfies(shape_expression, graph, schema, association, shape_map, ref_stack)
 end

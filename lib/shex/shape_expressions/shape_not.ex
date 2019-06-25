@@ -5,9 +5,9 @@ defmodule ShEx.ShapeNot do
   ]
 
   defimpl ShEx.ShapeExpression do
-    def satisfies(shape_not, graph, schema, association, shape_map) do
+    def satisfies(shape_not, graph, schema, association, shape_map, ref_stack) do
       if match?(%{status: :nonconformant},
-           ShEx.ShapeExpression.satisfies(shape_not.shape_expr, graph, schema, association, shape_map)) do
+           ShEx.ShapeExpression.satisfies(shape_not.shape_expr, graph, schema, association, shape_map, ref_stack)) do
         ShEx.ShapeMap.Association.conform(association)
       else
         ShEx.ShapeMap.Association.violation(association,
