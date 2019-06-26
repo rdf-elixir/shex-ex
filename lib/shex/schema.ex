@@ -28,13 +28,14 @@ defmodule ShEx.Schema do
   end
 
   def validate(schema, data, %ShapeMap{type: :fixed} = shape_map, opts) do
+    start = start_shape_expr(schema)
     shape_map
     |> ShapeMap.associations()
     |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
          result_shape_map
          |> ShapeMap.add(
               schema
-              |> shape_expr_with_id(association.shape)
+              |> shape_expr(association.shape, start)
               |> ShapeExpression.satisfies(data, schema, association, shape_map, [])
             )
        end)
@@ -43,4 +44,15 @@ defmodule ShEx.Schema do
   def shape_expr_with_id(schema, shape_label) do
     Map.get(schema.shapes, shape_label)
   end
+
+  defp start_shape_expr(schema) do
+    if RDF.resource?(schema.start) do
+      shape_expr_with_id(schema, schema.start)
+    else
+      schema.start
+    end
+  end
+
+  defp shape_expr(_, :start, start_expr), do: start_expr
+  defp shape_expr(schema, shape_label, _), do: shape_expr_with_id(schema, shape_label)
 end

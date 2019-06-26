@@ -197,10 +197,12 @@ defmodule ShEx.TestSuiteTest do
           if shape_map_file do
             # TODO: decode query ShapeMap from JSON
           else
+            shape =
+              if RDF.iri(SHT.Start) in TestSuite.test_case_traits(test_case),
+                do: :start,
+                else: RDF.Description.first(test_case_action, SHT.shape)
             ShEx.ShapeMap.new(%{
-              RDF.Description.first(test_case_action, SHT.focus) =>
-              RDF.Description.first(test_case_action, SHT.shape)
-            })
+              RDF.Description.first(test_case_action, SHT.focus) => shape})
           end
 
         # TODO: decode result ShapeMap from JSON
