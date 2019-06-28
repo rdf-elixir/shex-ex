@@ -29,7 +29,7 @@ defmodule ShEx.Shape do
            check_extra(List.wrap(shape.extra), matchables, shape.expression),
 
          :ok <-
-           check_closed(shape.closed, unmatchables, shape.expression)
+           check_closed(shape.closed, unmatchables, shape)
     do
       ShEx.ShapeMap.Association.conform(association)
     else
@@ -93,11 +93,11 @@ defmodule ShEx.Shape do
   end
 
   # closed is false or unmatchables is empty.
-  defp check_closed(closed, unmatchables, triple_expressions) do
+  defp check_closed(closed, unmatchables, shape) do
     if !closed || Enum.empty?(unmatchables) do
       :ok
     else
-      {:error, %ShEx.Violation.MaxCardinality{triple_expression: triple_expressions}} # TODO: define new violation
+      {:error, %ShEx.Violation.ClosedShape{shape: shape, unmatchables: unmatchables}}
     end
   end
 

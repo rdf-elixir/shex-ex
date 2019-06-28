@@ -153,6 +153,18 @@ defmodule ShEx.Violation.MaxCardinality do
   end
 end
 
+defmodule ShEx.Violation.ClosedShape do
+  defstruct [:shape, :unmatchables]
+
+  defimpl ShEx.Violation do
+    def label(_), do: "Closed Shape Violation"
+
+    def reason(violation) do
+      "remaining unmatchables found in closed shape: #{violation.unmatchables |> Enum.map(&inspect/1) |> Enum.join(", ")}}"
+    end
+  end
+end
+
 defmodule ShEx.Violation.NegationMatch do
   defstruct [:shape_not]
 
