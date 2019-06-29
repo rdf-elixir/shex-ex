@@ -1,5 +1,12 @@
 defmodule ShEx.NodeConstraint do
-  defstruct [:id, :node_kind, :datatype, :string_facets, :numeric_facets, :values]
+  defstruct [
+    :id,             # shapeExprLabel?
+    :node_kind,      # ("iri" | "bnode" | "nonliteral" | "literal")?
+    :datatype,       # IRIREF?
+    :string_facets,  #
+    :numeric_facets, #
+    :values          # [valueSetValue+]?
+  ]
 
   alias RDF.{IRI, BlankNode, Literal}
   alias RDF.NS.XSD
@@ -60,8 +67,12 @@ defmodule ShEx.NodeConstraint do
   end
 
   defimpl ShEx.ShapeExpression do
-    def satisfies(node_constraint, _, _, association, _, _) do
+    def satisfies(node_constraint, _, _, association, _) do
       ShEx.NodeConstraint.satisfies(node_constraint, association)
     end
+  end
+
+  defimpl ShEx.Operator do
+    def triple_expression_label_and_operands(_), do: {nil, []}
   end
 end

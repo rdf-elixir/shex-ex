@@ -16,23 +16,23 @@ defmodule ShEx.TripleConstraint do
 
 
   def matches(%__MODULE__{inverse: true} = triple_constraint, {arcs_in, arcs_out},
-        graph, schema, association, shape_map, ref_stack) do
+        graph, schema, association, state) do
     with {:ok, matched, remainder} <-
-           matches(triple_constraint, arcs_in, graph, schema, association, shape_map, ref_stack) do
+           matches(triple_constraint, arcs_in, graph, schema, association, state) do
       {:ok, matched, {remainder, arcs_out}}
     end
   end
 
-  def matches(triple_constraint, {arcs_in, arcs_out}, graph, schema, association, shape_map, ref_stack) do
+  def matches(triple_constraint, {arcs_in, arcs_out}, graph, schema, association, state) do
     with {:ok, matched, remainder} <-
-           matches(triple_constraint, arcs_out, graph, schema, association, shape_map, ref_stack) do
+           matches(triple_constraint, arcs_out, graph, schema, association, state) do
       {:ok, matched, {arcs_in, remainder}}
     end
   end
 
-  def matches(triple_constraint, triples, graph, schema, association, shape_map, ref_stack) do
+  def matches(triple_constraint, triples, graph, schema, association, state) do
     with {matched, mismatched, remainder} <-
-           find_matches(triples, triple_constraint, graph, schema, association, shape_map, ref_stack),
+           find_matches(triples, triple_constraint, graph, schema, association, state),
          :ok <-
            check_cardinality(length(matched), triple_constraint.min || 1, triple_constraint)
     do
@@ -43,14 +43,14 @@ defmodule ShEx.TripleConstraint do
     end
   end
 
-  defp find_matches(triples, triple_constraint, graph, schema, association, shape_map, ref_stack) do
+  defp find_matches(triples, triple_constraint, graph, schema, association, state) do
     do_find_matches(
       {[], [], triples},
       triple_constraint.value_expr,
       triple_constraint.predicate,
       triple_constraint.inverse,
       triple_constraint.max || 1,
-      {graph, schema, association, shape_map, ref_stack}
+      {graph, schema, association, state}
     )
   end
 
@@ -72,7 +72,7 @@ defmodule ShEx.TripleConstraint do
   defp do_find_matches(
          {matched, mismatched, [{subject, predicate, object} = statement | remainder]},
          value_expr, predicate, inverse, max,
-         {graph, schema, association, shape_map, ref_stack} = match_context) do
+         {graph, schema, association, state} = match_context) do
       value = if inverse, do: subject, else: object
 
       with %{status: :conformant} <-
@@ -81,8 +81,7 @@ defmodule ShEx.TripleConstraint do
                graph,
                schema,
                ShEx.ShapeMap.Association.new(value, value_expr),
-               shape_map,
-               ref_stack)
+               state)
       do
         {[statement | matched], mismatched, remainder}
       else
@@ -100,15 +99,20 @@ defmodule ShEx.TripleConstraint do
 
 
   defimpl ShEx.TripleExpression do
-    def matches(triple_constraint, triples, graph, schema, association, shape_map) do
-      ShEx.TripleConstraint.matches(triple_constraint, triples, graph, schema, association, shape_map)
+    def matches(triple_constraint, triples, graph, schema, association, state) do
+      ShEx.TripleConstraint.matches(triple_constraint, triples, graph, schema, association, state)
     end
 
-    def predicates(%ShEx.TripleConstraint{predicate: predicate}), do: [predicate]
+    def predicates(%ShEx.TripleConstraint{predicate: predicate}, _), do: [predicate]
 
-    def triple_constraints(triple_constraint), do: [triple_constraint]
+    def triple_constraints(triple_constraint, _), do: [triple_constraint]
 
-    def required_arcs(%ShEx.TripleConstraint{inverse: true}), do: {:ok, :arcs_in}
-    def required_arcs(_), do: {:ok, :arcs_out}
+    def required_arcs(%ShEx.TripleConstraint{inverse: true}, _), do: {:ok, :arcs_in}
+    def required_arcs(_, _), do: {:ok, :arcs_out}
+  end
+
+  defimpl ShEx.Operator do
+    def triple_expression_label_and_operands(triple_constraint),
+      do: {triple_constraint.id, List.wrap(triple_constraint.value_expr)}
   end
 end

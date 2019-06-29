@@ -73,20 +73,13 @@ defmodule ShEx.TestSuiteTest do
       end)
 
       [
-        "startRefIRIREF_pass-others_lexicallyEarlier",
-        "startRefIRIREF_pass-noOthers",
-        "startRefIRIREF_fail-missing",
-        "startRefbnode_fail-missing",
-        "startRefbnode_pass-noOthers",
+        "nPlus1",
+        "PTstar-greedy-fail",
       ]
-      if RDF.iri(SHT.Start) in TestSuite.test_case_traits(test_case),
-         do: @tag skip: "TODO: start node (protocol ShEx.ShapeExpression not implemented for nil)"
-
-#      [
-#        "2OneInclude1_pass",
-#      ]
-      if RDF.iri(SHT.Include) in TestSuite.test_case_traits(test_case),
-        do: @tag skip: "TODO: include"
+      |> Enum.each(fn test_subject ->
+        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+           do: @tag skip: "TODO: greedy"
+      end)
 
       [
         "node_kind_example",

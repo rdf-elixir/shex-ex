@@ -11,19 +11,19 @@ defmodule ShEx.Shape do
   import ShEx.GraphUtils
 
 
-  def satisfies(shape, graph, schema, association, shape_map, ref_stack) do
+  def satisfies(shape, graph, schema, association, state) do
     node = association.node
     arcs_out = arcs_out(graph, node)
     arcs_in = arcs_in(graph, node)
 
     with {:ok, _matched, {_, outs}} <-
-            matches(shape.expression, {arcs_in, arcs_out}, graph, schema, association, shape_map, ref_stack),
+            matches(shape.expression, {arcs_in, arcs_out}, graph, schema, association, state),
 
          {matchables, unmatchables} <-
-           matchables(shape.expression, outs),
+           matchables(shape.expression, outs, state),
 
          :ok <-
-           check_unmatched(shape.expression, matchables, graph, schema, association, shape_map, ref_stack),
+           check_unmatched(shape.expression, matchables, graph, schema, association, state),
 
          :ok <-
            check_extra(List.wrap(shape.extra), matchables, shape.expression),
@@ -38,28 +38,28 @@ defmodule ShEx.Shape do
     end
   end
 
-  defp matches(nil, triples, _, _, _, _, _) do
+  defp matches(nil, triples, _, _, _, _) do
     {:ok, [], triples}
   end
 
-  defp matches(triple_constraint, triples, graph, schema, association, shape_map, ref_stack) do
+  defp matches(triple_constraint, triples, graph, schema, association, state) do
     ShEx.TripleExpression.matches(
-        triple_constraint, triples, graph, schema, association, shape_map, ref_stack)
+        triple_constraint, triples, graph, schema, association, state)
   end
 
   # Let `matchables` be the triples in `outs` whose predicate appears in a `TripleConstraint` in `expression`. If `expression` is absent, `matchables = Ø` (the empty set).
   # Let `unmatchables` be the triples in `outs` which are not in `matchables`.
-  defp matchables(nil, outs), do: {[], outs}
-  defp matchables(triple_constraint, outs) do
-    predicates = ShEx.TripleExpression.predicates(triple_constraint)
+  defp matchables(nil, outs, _), do: {[], outs}
+  defp matchables(triple_constraint, outs, state) do
+    predicates = ShEx.TripleExpression.predicates(triple_constraint, state)
     Enum.split_with(outs, fn {_, predicate, _} -> predicate in predicates end)
   end
 
   # No matchable can be matched by any TripleConstraint in expression
-  defp check_unmatched(nil, _, _, _, _, _, _), do: :ok
-  defp check_unmatched(triple_constraint, matchables, graph, schema, association, shape_map, ref_stack) do
+  defp check_unmatched(nil, _, _, _, _, _), do: :ok
+  defp check_unmatched(triple_constraint, matchables, graph, schema, association, state) do
     if triple_constraint
-       |> matching_unmatched(matchables, graph, schema, association, shape_map, ref_stack)
+       |> matching_unmatched(matchables, graph, schema, association, state)
        |> Enum.empty?()
     do
       :ok
@@ -68,17 +68,17 @@ defmodule ShEx.Shape do
     end
   end
 
-  defp matching_unmatched(triple_constraint, matchables, graph, schema, association, shape_map, ref_stack) do
+  defp matching_unmatched(triple_constraint, matchables, graph, schema, association, state) do
     triple_constraints =
       triple_constraint
-      |> ShEx.TripleExpression.triple_constraints()
+      |> ShEx.TripleExpression.triple_constraints(state)
         # We'll reset the cardinality here, because one match is sufficient ...
       |> Enum.map(fn expression -> expression |> Map.put(:min, nil) |> Map.put(:max, nil) end)
     Enum.filter(matchables, fn {_, predicate, _} = statement ->
       Enum.any?(triple_constraints, fn triple_constraint ->
         triple_constraint.predicate == predicate and
           match?({:ok, _, _},
-            matches(triple_constraint, {[], [statement]}, graph, schema, association, shape_map, ref_stack))
+            matches(triple_constraint, {[], [statement]}, graph, schema, association, state))
       end)
     end)
   end
@@ -103,8 +103,12 @@ defmodule ShEx.Shape do
 
 
   defimpl ShEx.ShapeExpression do
-    def satisfies(shape, graph, schema, association, shape_map, ref_stack) do
-      ShEx.Shape.satisfies(shape, graph, schema, association, shape_map, ref_stack)
+    def satisfies(shape, graph, schema, association, state) do
+      ShEx.Shape.satisfies(shape, graph, schema, association, state)
     end
+  end
+
+  defimpl ShEx.Operator do
+    def triple_expression_label_and_operands(shape), do: {nil, List.wrap(shape.expression)}
   end
 end

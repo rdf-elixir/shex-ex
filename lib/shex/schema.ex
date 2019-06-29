@@ -29,6 +29,12 @@ defmodule ShEx.Schema do
 
   def validate(schema, data, %ShapeMap{type: :fixed} = shape_map, opts) do
     start = start_shape_expr(schema)
+    state = %{
+      ref_stack: [],
+      labeled_triple_expressions:
+        schema.shapes |> Map.values() |> labeled_triple_expressions()
+    }
+
     shape_map
     |> ShapeMap.associations()
     |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
@@ -36,9 +42,31 @@ defmodule ShEx.Schema do
          |> ShapeMap.add(
               schema
               |> shape_expr(association.shape, start)
-              |> ShapeExpression.satisfies(data, schema, association, shape_map, [])
+              |> ShapeExpression.satisfies(data, schema, association, state)
             )
        end)
+  end
+
+  defp labeled_triple_expressions(operators) do
+    Enum.reduce(operators, %{}, fn operator, acc ->
+      case ShEx.Operator.triple_expression_label_and_operands(operator) do
+        {nil, []} ->
+          acc
+
+        {triple_expr_label, []} ->
+          acc
+          |> Map.put(triple_expr_label, operator)
+
+        {nil, triple_expressions} ->
+          acc
+          |> Map.merge(labeled_triple_expressions(triple_expressions))
+
+        {triple_expr_label, triple_expressions} ->
+          acc
+          |> Map.put(triple_expr_label, operator)
+          |> Map.merge(labeled_triple_expressions(triple_expressions))
+      end
+    end)
   end
 
   def shape_expr_with_id(schema, shape_label) do
