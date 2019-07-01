@@ -361,7 +361,7 @@ defmodule ShEx.ShExJ.Decoder do
     end
   end
 
-  defp to_value_set_value(%{type: "Language", languageTag: language_tag} = language, _) do
+  defp to_value_set_value(%{type: "Language", languageTag: _} = language, _) do
     {:ok, language}
   end
 
@@ -432,10 +432,6 @@ defmodule ShEx.ShExJ.Decoder do
         _ ->
           reraise error, __STACKTRACE__
       end
-  end
-
-  defp parse_json!(content, _opts \\ []) do
-    Jason.decode!(content)
   end
 
   @doc !"Some allowed keys which we don't want to cause to_existing_atom to fail"

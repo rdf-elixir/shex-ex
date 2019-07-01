@@ -10,8 +10,6 @@ defmodule ShEx.TripleConstraint do
     :annotations  # [Annotation+]?
   ]
 
-  alias RDF.{IRI, BlankNode, Literal}
-
   import ShEx.TripleExpression.Shared
 
 
@@ -63,7 +61,7 @@ defmodule ShEx.TripleConstraint do
     when length(matched) == max, do: acc
 
   defp do_find_matches(
-         {matched, mismatched, [{subject, predicate, object} = statement | remainder]},
+         {matched, mismatched, [{_, predicate, _} = statement | remainder]},
          nil, predicate, inverse, max, match_context) do
     {[statement | matched], mismatched, remainder}
     |> do_find_matches(nil, predicate, inverse, max, match_context)
@@ -72,7 +70,7 @@ defmodule ShEx.TripleConstraint do
   defp do_find_matches(
          {matched, mismatched, [{subject, predicate, object} = statement | remainder]},
          value_expr, predicate, inverse, max,
-         {graph, schema, association, state} = match_context) do
+         {graph, schema, _association, state} = match_context) do
       value = if inverse, do: subject, else: object
 
       with %{status: :conformant} <-
