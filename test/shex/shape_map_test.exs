@@ -25,14 +25,23 @@ defmodule ShEx.ShapeMapTest do
                @bnode => @shape_label,
                @literal => @shape_label
              }) == %ShapeMap{type: :fixed, conformant: [
-               %ShapeMap.Association{node: @bnode, shape: @shape_label},
-               %ShapeMap.Association{node: @iri, shape: @shape_label},
                %ShapeMap.Association{node: @literal, shape: @shape_label},
+               %ShapeMap.Association{node: @iri, shape: @shape_label},
+               %ShapeMap.Association{node: @bnode, shape: @shape_label},
              ]}
     end
 
     test "when given a map with triple patterns" do
-      # TODO:
+      assert ShapeMap.new(%{{:focus, @iri, @bnode} => @shape_label}) ==
+               %ShapeMap{
+                 type: :query,
+                 conformant: [
+                   %ShapeMap.Association{
+                     node: {:focus, @iri, @bnode},
+                     shape: @shape_label
+                   }
+                 ]
+               }
     end
   end
 
