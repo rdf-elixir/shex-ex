@@ -146,4 +146,18 @@ defmodule ShEx.ShapeMap do
 
   def to_fixed(%__MODULE__{type: :result} = shape_map),
     do: {:error, "a result shape map is not convertible to a fixed shape map"}
+
+
+  defimpl Enumerable do
+    def reduce(shape_map, acc, fun),
+      do: shape_map |> ShEx.ShapeMap.associations() |> Enumerable.reduce(acc, fun)
+
+    def member?(shape_map, association),
+      do: {:ok, association in ShEx.ShapeMap.associations(shape_map)}
+
+    def count(shape_map),
+      do: {:ok, shape_map |> ShEx.ShapeMap.associations() |> length()}
+
+    def slice(_shape_map), do: {:error, __MODULE__}
+  end
 end

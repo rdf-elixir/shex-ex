@@ -11,6 +11,12 @@ defmodule ShEx.ShapeMapTest do
   @literal ~L"foo"
   @shape_label ~I<http://example.com/Shape>
 
+  @conformant_association ShapeMap.Association.new(@iri, @shape_label)
+  @nonconformant_association ShapeMap.Association.new(@literal, @shape_label)
+                             |> ShapeMap.Association.violation("error")
+  @conformant_fixed_shape_map ShapeMap.new([@conformant_association])
+  @nonconformant_fixed_shape_map ShapeMap.new([@conformant_association, @nonconformant_association])
+
   describe "new/1" do
     test "when given a map of node-shape identifier pairs" do
       assert ShapeMap.new(%{@iri => @shape_label}) ==
@@ -106,4 +112,23 @@ defmodule ShEx.ShapeMapTest do
     # TODO:
   end
 
+  describe "Enumerable protocol" do
+    test "Enum.count" do
+      assert Enum.count(ShapeMap.new) == 0
+      assert Enum.count(@conformant_fixed_shape_map) == 1
+      assert Enum.count(@nonconformant_fixed_shape_map) == 2
+    end
+
+    test "Enum.member?" do
+      assert Enum.member?(@nonconformant_fixed_shape_map, @conformant_association)
+      assert Enum.member?(@nonconformant_fixed_shape_map, @nonconformant_association)
+      refute Enum.member?(@conformant_fixed_shape_map, @nonconformant_association)
+    end
+
+    test "Enum.reduce" do
+      assert Enum.reduce(@nonconformant_fixed_shape_map, [], fn (association, acc) ->
+               [association | acc]
+             end) == [@nonconformant_association, @conformant_association]
+    end
+  end
 end
