@@ -24,12 +24,20 @@ defmodule ShEx.ShapeMap do
       }
     end
 
+    defp coerce_node({subject, predicate, object}) do
+      {
+        (if subject in [:focus, :_], do: subject, else: RDF.Statement.coerce_subject(subject)),
+        RDF.Statement.coerce_predicate(predicate),
+        (if object in [:focus, :_], do: object, else: RDF.Statement.coerce_object(object)),
+      }
+    end
+
     defp coerce_node(node) do
       cond do
-        is_tuple(node) or RDF.term?(node) ->
+        not is_atom(node) and RDF.term?(node) ->
           node
 
-        is_binary(node) and String.contains?(node, ":") ->
+        is_atom(node) or (is_binary(node) and String.contains?(node, ":")) ->
           RDF.iri(node)
 
         true ->
@@ -40,7 +48,7 @@ defmodule ShEx.ShapeMap do
     defp coerce_shape(shape) do
       cond do
         # we allow maps to pass unchanged because we create intermediary associations containing shapes directly
-        RDF.term?(shape) or is_map(shape) ->
+        is_map(shape) or (not is_atom(shape) and RDF.term?(shape)) ->
           shape
 
         shape in [:start, "START"] ->

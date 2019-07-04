@@ -6,10 +6,17 @@ defmodule ShEx.ShapeMapTest do
 
   alias ShEx.ShapeMap
 
-  @iri ~I<http://example.com/foo>
+  use RDF.Vocabulary.Namespace
+
+  defvocab EX,
+           base_iri: "http://example.org/#",
+           terms: [], strict: false
+
+
+  @iri ~I<http://example.org/#foo>
   @bnode ~B<foo>
   @literal ~L"foo"
-  @shape_label ~I<http://example.com/Shape>
+  @shape_label ~I<http://example.org/#Shape>
 
   @conformant_association ShapeMap.Association.new(@iri, @shape_label)
   @nonconformant_association ShapeMap.Association.new(@literal, @shape_label)
@@ -37,6 +44,14 @@ defmodule ShEx.ShapeMapTest do
              ]}
     end
 
+    test "when given a map of node-shape identifier pairs consisting of vocabulary atoms" do
+      assert ShapeMap.new(%{EX.Foo => EX.Shape}) ==
+               %ShapeMap{
+                 type: :fixed,
+                 conformant: [%ShapeMap.Association{node: ~I<http://example.org/#Foo>, shape: @shape_label}]
+               }
+    end
+
     test "when given a map with triple patterns" do
       assert ShapeMap.new(%{{:focus, @iri, @bnode} => @shape_label}) ==
                %ShapeMap{
@@ -44,6 +59,30 @@ defmodule ShEx.ShapeMapTest do
                  conformant: [
                    %ShapeMap.Association{
                      node: {:focus, @iri, @bnode},
+                     shape: @shape_label
+                   }
+                 ]
+               }
+    end
+
+    test "when given a map with triple patterns consisting of vocabulary atoms" do
+      assert ShapeMap.new(%{{EX.Bar, EX.foo, :focus} => EX.Shape}) ==
+               %ShapeMap{
+                 type: :query,
+                 conformant: [
+                   %ShapeMap.Association{
+                     node: {~I<http://example.org/#Bar>, @iri, :focus},
+                     shape: @shape_label
+                   }
+                 ]
+               }
+
+      assert ShapeMap.new(%{{:focus, EX.Foo, :_} => EX.Shape}) ==
+               %ShapeMap{
+                 type: :query,
+                 conformant: [
+                   %ShapeMap.Association{
+                     node: {:focus, ~I<http://example.org/#Foo>, :_},
                      shape: @shape_label
                    }
                  ]
