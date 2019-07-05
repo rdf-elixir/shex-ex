@@ -38,12 +38,16 @@ defmodule ShEx.Schema do
     shape_map
     |> ShapeMap.associations()
     |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
-         result_shape_map
-         |> ShapeMap.add(
-              schema
-              |> shape_expr(association.shape, start)
-              |> ShapeExpression.satisfies(data, schema, association, state)
-            )
+         if shape = shape_expr(schema, association.shape, start) do
+           ShapeMap.add(result_shape_map,
+             ShapeExpression.satisfies(shape, data, schema, association, state)
+           )
+         else
+           ShapeMap.add(result_shape_map,
+             ShapeMap.Association.violation(association,
+               %ShEx.Violation.UnknownReference{expr_ref: association.shape})
+           )
+         end
        end)
   end
 
