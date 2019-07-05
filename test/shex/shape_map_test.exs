@@ -148,7 +148,63 @@ defmodule ShEx.ShapeMapTest do
   end
 
   describe "to_fixed/1" do
-    # TODO:
+    @graph RDF.Turtle.Decoder.decode!("""
+      <http://example.org/#S1> <http://example.org/#p1> <http://example.org/#O1> .
+      <http://example.org/#S1> <http://example.org/#p2> <http://example.org/#O2> .
+      <http://example.org/#S1> <http://example.org/#p1> _:blank .
+      """)
+
+    test "focus on subject" do
+      assert ShapeMap.new(%{
+               {:focus, ~I<http://example.org/#p1>, ~I<http://example.org/#O1>} => @shape_label}
+             ) |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new(%{~I<http://example.org/#S1> => @shape_label})}
+
+      assert ShapeMap.new(%{{:focus, EX.p1, EX.O1} => @shape_label})
+             |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new(%{~I<http://example.org/#S1> => @shape_label})}
+    end
+
+    test "focus on object" do
+      assert ShapeMap.new(%{
+               {~I<http://example.org/#S1>, ~I<http://example.org/#p1>, :focus} => @shape_label}
+             ) |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new(%{
+                 ~I<http://example.org/#O1> => @shape_label,
+                 ~B<blank> => @shape_label
+               })}
+    end
+
+    test "focus on subject and wildcard object" do
+      assert ShapeMap.new(%{{:focus, EX.p1, :_} => @shape_label})
+             |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new(%{~I<http://example.org/#S1> => @shape_label})}
+    end
+
+    test "focus on object and wildcard subject" do
+      assert ShapeMap.new(%{
+               {:_, ~I<http://example.org/#p1>, :focus} => @shape_label}
+             ) |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new(%{
+                 ~I<http://example.org/#O1> => @shape_label,
+                 ~B<blank> => @shape_label
+               })}
+    end
+
+    test "without results" do
+      assert ShapeMap.new(%{
+               {:_, ~I<http://example.org/#p4>, :focus} => @shape_label}
+             ) |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new()}
+
+    end
+
+    test "if the same shape association is imputed multiple times, it appears in the fixed ShapeMap only once" do
+      assert ShapeMap.new(%{
+               {:_, EX.p2, :focus} => @shape_label}
+             ) |> ShapeMap.to_fixed(@graph) ==
+               {:ok, ShapeMap.new(%{~I<http://example.org/#O2> => @shape_label})}
+    end
   end
 
   describe "Enumerable protocol" do

@@ -24,7 +24,9 @@ defmodule ShEx.Schema do
   def validate(schema, data, shape_map, opts \\ [])
 
   def validate(schema, data, %ShapeMap{type: :query} = shape_map, opts) do
-    validate(schema, data, ShapeMap.to_fixed(shape_map), opts)
+    with {:ok, fixed_shape_map} <- ShapeMap.to_fixed(shape_map, data) do
+      validate(schema, data, fixed_shape_map, opts)
+    end
   end
 
   def validate(schema, data, %ShapeMap{type: :fixed} = shape_map, opts) do

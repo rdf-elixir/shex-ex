@@ -145,16 +145,70 @@ defmodule ShEx.ShapeMap do
   def result?(_), do: nil
 
 
-  def to_fixed(%__MODULE__{type: :query} = shape_map) do
-    # TODO
+  def to_fixed(%__MODULE__{type: :query} = shape_map, graph) do
+    {:ok,
+      shape_map
+      |> Stream.flat_map(&(resolve_triple_pattern(&1, graph)))
+      |> MapSet.new()
+      |> new()
+    }
   end
 
-  def to_fixed(%__MODULE__{type: :fixed} = shape_map),
+  def to_fixed(%__MODULE__{type: :fixed} = shape_map, _),
     do: {:ok, shape_map}
 
-  def to_fixed(%__MODULE__{type: :result} = shape_map),
+  def to_fixed(%__MODULE__{type: :result}, _),
     do: {:error, "a result shape map is not convertible to a fixed shape map"}
 
+  defp resolve_triple_pattern(%ShEx.ShapeMap.Association{node: triple_pattern, shape: shape}, graph)
+       when is_tuple(triple_pattern) do
+    triple_pattern
+    |> do_resolve_triple_pattern(graph)
+    |> Enum.map(fn node -> ShEx.ShapeMap.Association.new(node, shape) end)
+  end
+
+  defp resolve_triple_pattern(%ShEx.ShapeMap.Association{} = association, _),
+    do: {:ok, association}
+
+  defp do_resolve_triple_pattern({:focus, predicate, :_}, graph) do
+    graph
+    |> Stream.map(fn
+         {subject, ^predicate, _} -> subject
+         _ -> nil
+       end)
+    |> post_process_query()
+  end
+
+  defp do_resolve_triple_pattern({:_, predicate, :focus}, graph) do
+    graph
+    |> Stream.map(fn
+         {_, ^predicate, object} -> object
+         _ -> nil
+       end)
+    |> post_process_query()
+  end
+
+  defp do_resolve_triple_pattern({subject, predicate, :focus}, graph) do
+    graph
+    |> RDF.Graph.description(subject)
+    |> RDF.Description.get(predicate, [])
+  end
+
+  defp do_resolve_triple_pattern({:focus, predicate, object}, graph) do
+    graph
+    |> Stream.map(fn
+      {subject, ^predicate, ^object} -> subject
+      _ -> nil
+    end)
+    |> post_process_query()
+  end
+
+  defp post_process_query(nodes) do
+    nodes
+    |> MapSet.new()
+    |> MapSet.delete(nil)
+    |> MapSet.to_list()
+  end
 
   defimpl Enumerable do
     def reduce(shape_map, acc, fun),
