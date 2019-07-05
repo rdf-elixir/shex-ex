@@ -390,11 +390,15 @@ defmodule ShEx.ShExJ.Decoder do
   defp to_iri_or_wildcard(iri, options), do: to_iri(iri, options)
 
   defp to_iri(iri, options) do
-    if RDF.IRI.valid?(iri) do
-      {:ok, RDF.iri(iri)}
-    else
-      # TODO: string must be resolved to IRI (via @context or IRIREF)
-      {:ok, nil}
+    cond do
+      RDF.IRI.absolute?(iri) ->
+        {:ok, RDF.iri(iri)}
+
+      base = Keyword.get(options, :base) ->
+        {:ok, RDF.IRI.merge(base, iri)}
+
+      true ->
+        {:error, "unresolvable relative IRI '#{iri}', no base iri defined"}
     end
   end
 
