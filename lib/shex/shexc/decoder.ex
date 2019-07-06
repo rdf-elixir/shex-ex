@@ -4,6 +4,8 @@ defmodule ShEx.ShExC.Decoder do
   alias RDF.{IRI, BlankNode, Literal}
   alias ShEx.NodeConstraint.{StringFacets, NumericFacets}
 
+  import RDF.Serialization.ParseHelper, only: [error_description: 1]
+
   defmodule State do
     defstruct base_iri: nil, namespaces: %{}, bnode_counter: 0
 
@@ -31,14 +33,6 @@ defmodule ShEx.ShExC.Decoder do
          "ShExC parser error on line #{error_line}: #{error_description(error_descriptor)}"}
     end
   end
-
-  defp error_description(error_descriptor) when is_list(error_descriptor) do
-    error_descriptor
-    |> Stream.map(&to_string/1)
-    |> Enum.join("")
-  end
-
-  defp error_description(error_descriptor), do: inspect(error_descriptor)
 
   def tokenize(content), do: content |> to_charlist |> :shexc_lexer.string()
 
@@ -645,7 +639,7 @@ defmodule ShEx.ShExC.Decoder do
 
   defp unescape_regex(nil), do: nil
   defp unescape_regex(string),
-    do: string |> unescape_8digit_unicode_seq |> Macro.unescape_string(&regex_unescape_map(&1))
+    do: string |> unescape_8digit_unicode_seq() |> Macro.unescape_string(&regex_unescape_map(&1))
 
   defp regex_unescape_map(:unicode), do: true
   defp regex_unescape_map(?/), do: ?\/
