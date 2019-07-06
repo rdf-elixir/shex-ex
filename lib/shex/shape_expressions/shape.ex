@@ -14,7 +14,14 @@ defmodule ShEx.Shape do
   def satisfies(shape, graph, schema, association, state) do
     node = association.node
     arcs_out = arcs_out(graph, node)
-    arcs_in = arcs_in(graph, node)
+    arcs_in =
+      # Since the search for arcs_in computationally very expensive with RDF.ex
+      # having currently no index on the triple objects, we do this only when
+      # necessary, i.e. when inverse triple expressions exist.
+      unless shape.expression &&
+               ShEx.TripleExpression.required_arcs(shape.expression, state) == {:arcs_out} do
+        arcs_in(graph, node)
+      end
 
     with {:ok, _matched, {_, outs}} <-
             matches(shape.expression, {arcs_in, arcs_out}, graph, schema, association, state),
