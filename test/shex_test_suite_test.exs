@@ -72,47 +72,6 @@ defmodule ShEx.TestSuiteTest do
     TestSuite.test_cases(@validation_manifest, suite_type: "validation")
     |> Enum.each(fn test_case ->
 
-      [
-        "1literalPattern_with_ascii_boundaries_fail",
-        "1literalPattern_with_all_controls_fail",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: non-ascii character handling"
-      end)
-
-      [
-        "nPlus1",
-        "PTstar-greedy-fail",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: greedy"
-      end)
-
-      [
-        "node_kind_example",
-        "recursion_example",
-        "dependent_shape",
-
-        # unknown result format (.val)
-#        "2RefS1-IS2",
-#        "2RefS1-Icirc",
-#        "2RefS2-IS1",
-#        "3circRefS1-IS23",
-#        "3circRefS1-IS2-IS3",
-#        "3circRefS3",
-#        "3circRefS3-IS12",
-#        "3circRefS123",
-#        "3circRefS123-Icirc",
-#        "3circRefS1-Icirc",
-#        "3circRefS1-IS2-IS3-IS3",
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: loading query and/or result shape map"
-      end)
-
 #      [
 #        "3circRefS123-Icirc",
 #        "2RefS1-IS2",
@@ -178,8 +137,26 @@ defmodule ShEx.TestSuiteTest do
         "nonPositiveInteger-a1_fail",
       ]
       |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: unsupported datatype"
+          if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+             do: @tag skip: "TODO: unsupported datatype"
+      end)
+
+      [
+        "nPlus1",
+        "PTstar-greedy-fail",
+      ]
+      |> Enum.each(fn test_subject ->
+          if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+             do: @tag skip: "TODO: greedy"
+      end)
+
+      [
+        "1literalPattern_with_ascii_boundaries_fail",
+        "1literalPattern_with_all_controls_fail",
+      ]
+      |> Enum.each(fn test_subject ->
+          if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+             do: @tag skip: "TODO: non-ascii character handling"
       end)
 
       @tag test_case: test_case
@@ -245,10 +222,8 @@ defmodule ShEx.TestSuiteTest do
             RDF.Description.first(test_case_action, SHT.focus) => shape})
         end
 
-      # TODO: decode result ShapeMap from JSON
-      result = nil
+      result = RDF.Description.first(test_case, MF.result)
 
-      # TODO: sht:shapeExterns <../schemas/shapeExtern.shextern>
       shape_externs =
         test_case_action
         |> RDF.Description.first(SHT.shapeExterns)
@@ -271,14 +246,21 @@ defmodule ShEx.TestSuiteTest do
 
     defp test_validation(type, graph, schema, shape_map, nil, _external_shape) do
       assert %ShEx.ShapeMap{} = result = ShEx.validate(graph, schema, shape_map)
+
       case type do
         "ValidationTest"    -> assert ShEx.ShapeMap.conformant?(result)
         "ValidationFailure" -> refute ShEx.ShapeMap.conformant?(result)
       end
     end
 
-    defp test_validation(type, graph, schema, shape_map, expected_result, _external_shape) do
-      assert false, "Result parser missing" # TODO
+    defp test_validation(_type, graph, schema, shape_map, expected_result_file, _external_shape) do
+      assert {:ok, expected_result} =
+               expected_result_file
+               |> ShEx.TestSuite.file()
+               |> File.read!()
+               |> ShEx.ShapeMap.JSON.decode()
+
+      assert %ShEx.ShapeMap{} = ShEx.validate(graph, schema, shape_map)
     end
   end
 end

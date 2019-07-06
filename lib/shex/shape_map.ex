@@ -11,11 +11,28 @@ defmodule ShEx.ShapeMap do
 
     @type status :: :conformant | :nonconformant | nil
 
+
+    def new(association)
+
+    # This is for the JSON-encoded ShapeMap format from the test suite
+    def new({node, %{"shape" => shape, "result" => result}}) do
+      %__MODULE__{new(node, shape) |
+        status: if result == false do
+          :nonconformant
+        else
+          :conformant
+        end
+      }
+    end
+
     def new({node, shape}), do: new(node, shape)
 
     def new(%ShEx.ShapeMap.Association{} = association), do: association
 
     def new(%{node: node, shape: shape}), do: new(node, shape)
+
+    # This is for the JSON-encoded ShapeMap format from the test suite
+    def new(%{"node" => node, "shape" => shape}), do: new(node, shape)
 
     def new(node, shape) do
       %__MODULE__{
@@ -97,6 +114,16 @@ defmodule ShEx.ShapeMap do
 
   def new(associations, opts \\ []) do
      Enum.reduce(associations, new(), &(add(&2, &1)))
+  end
+
+  def add(shape_map, associations) when is_list(associations) do
+    Enum.reduce(associations, shape_map, &(add(&2, &1)))
+  end
+
+  def add(shape_map, {node, associations}) when is_list(associations) do
+    Enum.reduce(associations, shape_map, fn association, shape_map ->
+      add(shape_map, {node, association})
+    end)
   end
 
   def add(shape_map, association) do
