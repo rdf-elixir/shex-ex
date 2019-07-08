@@ -34,10 +34,10 @@ defmodule ShEx.ShExC.Decoder do
     end
   end
 
-  def tokenize(content), do: content |> to_charlist |> :shexc_lexer.string()
+  defp tokenize(content), do: content |> to_charlist |> :shexc_lexer.string()
 
-  def parse([]), do: {:ok, []}
-  def parse(tokens), do: tokens |> :shexc_parser.parse()
+  defp parse([]), do: {:ok, []}
+  defp parse(tokens), do: tokens |> :shexc_parser.parse()
 
   defp build_schema({:shex_doc, directives_ast, start_acts_ast, statements_ast}, base) do
     with state = %State{base_iri: base},
@@ -76,7 +76,7 @@ defmodule ShEx.ShExC.Decoder do
     {:ok, statements, state}
   end
 
-  def handle_base_and_prefixes({:prefix, {:prefix_ns, _, ns}, iri} = directive, {statements, value, state}) do
+  defp handle_base_and_prefixes({:prefix, {:prefix_ns, _, ns}, iri} = directive, {statements, value, state}) do
     {
       if value == :consume_directives do
         statements
@@ -96,7 +96,7 @@ defmodule ShEx.ShExC.Decoder do
     }
   end
 
-  def handle_base_and_prefixes({:base, iri} = directive,
+  defp handle_base_and_prefixes({:base, iri} = directive,
         {statements, value, %State{base_iri: base_iri} = state}) do
     {
       if value == :consume_directives do
@@ -120,7 +120,7 @@ defmodule ShEx.ShExC.Decoder do
     }
   end
 
-  def handle_base_and_prefixes(statement, {statements, value, state}) do
+  defp handle_base_and_prefixes(statement, {statements, value, state}) do
     {statements ++ [statement], value, state}
   end
 
@@ -645,7 +645,7 @@ defmodule ShEx.ShExC.Decoder do
   defp regex_unescape_map(?/), do: ?\/
   defp regex_unescape_map(_), do: false
 
-  def unescape_8digit_unicode_seq(string) do
+  defp unescape_8digit_unicode_seq(string) do
     String.replace(string, ~r/(?<!\\)\\U([0-9]|[A-F]|[a-f]){2}(([0-9]|[A-F]|[a-f]){6})/, "\\u{\\2}")
   end
 end

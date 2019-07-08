@@ -27,10 +27,10 @@ defmodule ShEx.ShapeMap.Decoder do
 
   defp error_description(error_descriptor), do: inspect(error_descriptor)
 
-  def tokenize(content), do: content |> to_charlist |> :shape_map_lexer.string()
+  defp tokenize(content), do: content |> to_charlist |> :shape_map_lexer.string()
 
-  def parse([]), do: {:ok, []}
-  def parse(tokens), do: tokens |> :shape_map_parser.parse()
+  defp parse([]), do: {:ok, []}
+  defp parse(tokens), do: tokens |> :shape_map_parser.parse()
 
   defp build_shape_map(shape_associations_ast, opts) do
     with {:ok, associations} <-
