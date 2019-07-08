@@ -1,4 +1,6 @@
 defmodule ShEx.NodeConstraint.NumericFacets do
+  @moduledoc false
+
   defstruct ~w[mininclusive minexclusive maxinclusive maxexclusive totaldigits fractiondigits]a
 
   alias RDF.Literal

@@ -1,4 +1,6 @@
 defmodule ShEx.ShapeExpressionReference do
+  @moduledoc false
+
   def satisfies(expr_ref, graph, schema, association, state) do
     with {:ok, ref_stack} <-
             push_ref_stack(state.ref_stack, {expr_ref, association.node}),

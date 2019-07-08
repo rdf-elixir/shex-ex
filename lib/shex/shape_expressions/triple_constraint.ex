@@ -1,4 +1,6 @@
 defmodule ShEx.TripleConstraint do
+  @moduledoc false
+
   defstruct [
     :id,          #	tripleExprLabel?
     :value_expr,  # shapeExpr?

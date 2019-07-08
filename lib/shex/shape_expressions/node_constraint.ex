@@ -1,4 +1,6 @@
 defmodule ShEx.NodeConstraint do
+  @moduledoc false
+
   defstruct [
     :id,             # shapeExprLabel?
     :node_kind,      # ("iri" | "bnode" | "nonliteral" | "literal")?

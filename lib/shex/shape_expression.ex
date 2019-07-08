@@ -1,5 +1,5 @@
 defprotocol ShEx.ShapeExpression do
-  @moduledoc """
+  @moduledoc !"""
   A shape expression is a logical combination of node constraints and shapes.
   """
 

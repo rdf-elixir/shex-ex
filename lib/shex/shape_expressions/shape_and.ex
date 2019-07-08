@@ -1,4 +1,6 @@
 defmodule ShEx.ShapeAnd do
+  @moduledoc false
+
   defstruct [
     :id,          # shapeExprLabel?
     :shape_exprs  # [shapeExpr{2,}]

@@ -1,4 +1,6 @@
 defmodule ShEx.TripleExpressionReference do
+  @moduledoc false
+
   def matches(triple_expression_ref, triples, graph, schema, association, state) do
     triple_expression_ref
     |> triple_expression_with_id(state)

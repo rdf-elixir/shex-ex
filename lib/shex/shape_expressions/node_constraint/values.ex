@@ -1,4 +1,6 @@
 defmodule ShEx.NodeConstraint.Values do
+  @moduledoc false
+
   alias RDF.{IRI, Literal}
 
   @wildcard %{type: "Wildcard"}

@@ -1,4 +1,6 @@
 defmodule ShEx.OneOf do
+  @moduledoc false
+
   defstruct [
     :id,          # tripleExprLabel?
     :expressions, # [tripleExpr{2,}]

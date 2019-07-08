@@ -1,4 +1,6 @@
 defmodule ShEx.ShExJ.Decoder do
+  @moduledoc false
+
   import ShEx.Utils
 
   def decode(content, options \\ []) do

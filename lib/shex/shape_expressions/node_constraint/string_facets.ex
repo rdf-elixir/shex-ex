@@ -1,4 +1,6 @@
 defmodule ShEx.NodeConstraint.StringFacets do
+  @moduledoc false
+
   defstruct ~w[length minlength maxlength pattern flags]a
 
   alias RDF.{IRI, BlankNode, Literal}

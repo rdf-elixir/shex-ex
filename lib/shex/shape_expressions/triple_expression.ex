@@ -1,5 +1,5 @@
 defprotocol ShEx.TripleExpression do
-  @moduledoc """
+  @moduledoc !"""
   Triple expressions are used for defining patterns composed of triple constraints.
   """
 
@@ -16,6 +16,8 @@ defprotocol ShEx.TripleExpression do
 end
 
 defmodule ShEx.TripleExpression.Shared do
+  @moduledoc false
+
   def triple_constraints_of_group(group, state) do
     group.expressions
     |> Enum.flat_map(&(ShEx.TripleExpression.triple_constraints(&1, state)))

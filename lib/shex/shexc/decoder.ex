@@ -1,4 +1,6 @@
 defmodule ShEx.ShExC.Decoder do
+  @moduledoc false
+
   import ShEx.Utils
 
   alias RDF.{IRI, BlankNode, Literal}
@@ -7,6 +9,8 @@ defmodule ShEx.ShExC.Decoder do
   import RDF.Serialization.ParseHelper, only: [error_description: 1]
 
   defmodule State do
+    @moduledoc false
+
     defstruct base_iri: nil, namespaces: %{}, bnode_counter: 0
 
     def add_namespace(%State{namespaces: namespaces} = state, ns, iri) do
