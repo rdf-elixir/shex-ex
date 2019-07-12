@@ -70,7 +70,7 @@ defmodule ShEx.Violation.NumericFacetConstraint do
   defimpl ShEx.Violation do
     def label(_), do: "Numeric Facet Constraint Violation"
 
-    def reason(%{facet_type: :numeric} = violation) do
+    def reason(%{facet_type: :invalid_numeric} = violation) do
       "#{inspect violation.node} is not numeric"
     end
 
@@ -106,24 +106,24 @@ defmodule ShEx.Violation.ValuesConstraint do
   defimpl ShEx.Violation do
     def label(_), do: "Values Constraint Violation"
 
-    def reason(%{onstraint_type: :object_value} = violation) do
-      "#{inspect violation.node} is not #{inspect violation.object_value}"
+    def reason(%{constraint_type: :object_value} = violation) do
+      "#{inspect violation.node} is not #{inspect violation.constraint_value}"
     end
 
-    def reason(%{onstraint_type: :language, object_value: :any} = violation) do
+    def reason(%{constraint_type: :language, object_value: :any} = violation) do
       "language #{inspect violation.node} is not language-tagged"
     end
 
-    def reason(%{onstraint_type: :language} = violation) do
-      "language #{inspect violation.node} is not #{inspect violation.object_value}"
+    def reason(%{constraint_type: :language} = violation) do
+      "language #{inspect violation.node} is not #{inspect violation.constraint_value}"
     end
 
-    def reason(%{onstraint_type: type} = violation)
+    def reason(%{constraint_type: type} = violation)
         when type in ~w[IriStem LiteralStem LanguageStem IriStemRange LiteralStemRange LanguageStemRange] do
-      "stem of #{inspect violation.node} is not #{inspect violation.object_value}"
+      "stem of #{inspect violation.node} is not #{inspect violation.constraint_value}"
     end
 
-    def reason(%{onstraint_type: :exclusion} = violation) do
+    def reason(%{constraint_type: :exclusion} = violation) do
       "#{inspect violation.node} is an excluded value"
     end
   end

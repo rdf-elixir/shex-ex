@@ -16,7 +16,7 @@ defmodule ShEx.ShapeOr do
              {:halt, :ok}
            else
              %{reason: reason, app_info: app_info} ->
-               {:cont, {[reason | reasons], [app_info | app_infos]}}
+               {:cont, {reasons ++ List.wrap(reason), [app_info | app_infos]}}
            end
          end)
       |> case do

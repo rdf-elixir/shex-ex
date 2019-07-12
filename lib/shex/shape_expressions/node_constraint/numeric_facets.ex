@@ -54,7 +54,7 @@ defmodule ShEx.NodeConstraint.NumericFacets do
 
   def satisfies(_, node) do
     %ShEx.Violation.NumericFacetConstraint{
-      facet_type: :numeric,
+      facet_type: :invalid_numeric,
       node: node
     }
   end
