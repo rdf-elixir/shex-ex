@@ -22,6 +22,7 @@ defmodule ShEx.MixProject do
     [
 #      {:rdf, "~> 0.6.1"},
       {:rdf, path: "../rdf"},
+      {:flow, "~> 0.14"},
       {:jason, "~> 1.1"},
     ]
   end

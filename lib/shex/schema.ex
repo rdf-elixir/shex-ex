@@ -12,6 +12,11 @@ defmodule ShEx.Schema do
 
   alias ShEx.{ShapeMap, ShapeExpression}
 
+  @parallel_default Application.get_env(:shex, :parallel, false)
+  @flow_opts_defaults Application.get_env(:shex, :flow_opts)
+  @flow_opts MapSet.new(~w[max_demand min_demand stages window buffer_keep buffer_size]a)
+
+
   def new(shapes, start \\ nil, imports \\ nil, start_acts \\ nil) do
     %ShEx.Schema{
       shapes: shapes |> List.wrap() |> Map.new(fn shape -> {shape.id, shape} end),
@@ -37,20 +42,51 @@ defmodule ShEx.Schema do
         schema.shapes |> Map.values() |> labeled_triple_expressions()
     }
 
-    shape_map
-    |> ShapeMap.associations()
-    |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
-         if shape = shape_expr(schema, association.shape, start) do
-           ShapeMap.add(result_shape_map,
+    if par_opts = parallelization_options(shape_map, data, opts) do
+      shape_map
+      |> ShapeMap.associations()
+      |> Flow.from_enumerable(par_opts)
+      |> Flow.map(fn association ->
+           if shape = shape_expr(schema, association.shape, start) do
              ShapeExpression.satisfies(shape, data, schema, association, state)
-           )
-         else
-           ShapeMap.add(result_shape_map,
+           else
              ShapeMap.Association.violation(association,
                %ShEx.Violation.UnknownReference{expr_ref: association.shape})
-           )
-         end
-       end)
+           end
+      end)
+      |> Enum.reduce(%ShapeMap{type: :result}, fn association, shape_map ->
+           ShapeMap.add(shape_map, association)
+         end)
+    else
+      shape_map
+      |> ShapeMap.associations()
+      |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
+           if shape = shape_expr(schema, association.shape, start) do
+             ShapeMap.add(result_shape_map,
+               ShapeExpression.satisfies(shape, data, schema, association, state)
+             )
+           else
+             ShapeMap.add(result_shape_map,
+               ShapeMap.Association.violation(association,
+                 %ShEx.Violation.UnknownReference{expr_ref: association.shape})
+             )
+           end
+         end)
+    end
+  end
+
+  defp parallelization_options(shape_map, data, opts) do
+    if Keyword.get(opts, :parallel, @parallel_default) do
+      if opts |> Keyword.keys() |> MapSet.new() |> MapSet.disjoint?(@flow_opts) do
+        flow_opts_defaults(shape_map, data, opts)
+      else
+        opts
+      end
+    end
+  end
+
+  defp flow_opts_defaults(shape_map, data, opts) do
+    @flow_opts_defaults || [] # TODO: provide sensible defaults based on the input
   end
 
   defp labeled_triple_expressions(operators) do

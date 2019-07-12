@@ -79,5 +79,18 @@ defmodule ShExTest do
                @example_result_shape_map
 
     end
+
+    test "ShEx primer example in parallel" do
+      assert result_shape_map =
+               ShEx.validate(@example_data, @example_schema, @example_shape_map,
+                               parallel: true, max_demand: 1)
+
+      assert MapSet.new(result_shape_map.conformant) ==
+               MapSet.new(@example_result_shape_map.conformant)
+      assert MapSet.new(result_shape_map.nonconformant) ==
+               MapSet.new(@example_result_shape_map.nonconformant)
+      assert %ShEx.ShapeMap{result_shape_map | conformant: [], nonconformant: []} ==
+               %ShEx.ShapeMap{@example_result_shape_map | conformant: [], nonconformant: []}
+    end
   end
 end
