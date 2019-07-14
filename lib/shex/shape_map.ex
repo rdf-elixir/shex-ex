@@ -116,6 +116,14 @@ defmodule ShEx.ShapeMap do
      Enum.reduce(associations, new(), &(add(&2, &1)))
   end
 
+  defdelegate decode(content, opts \\ []), to: ShEx.ShapeMap.Decoder
+
+  def from_json(content, options \\ []) do
+    with {:ok, json_objects} <- Jason.decode(content, options) do
+      {:ok, ShEx.ShapeMap.new(json_objects)}
+    end
+  end
+
   def add(shape_map, associations) when is_list(associations) do
     Enum.reduce(associations, shape_map, &(add(&2, &1)))
   end
@@ -141,7 +149,7 @@ defmodule ShEx.ShapeMap do
     when is_list(nonconformant) and length(nonconformant) > 0,
     do: %__MODULE__{shape_map | type: :result}
 
-  defp update_type((%__MODULE__{type: :query, nonconformant: nonconformant}) = shape_map, _)
+  defp update_type((%__MODULE__{type: :query, nonconformant: nonconformant}), _)
     when is_list(nonconformant) and length(nonconformant) > 0,
     do: raise "a result shape map can not contain triple patterns"
 

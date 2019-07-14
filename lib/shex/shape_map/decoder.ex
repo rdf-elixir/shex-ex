@@ -1,4 +1,8 @@
 defmodule ShEx.ShapeMap.Decoder do
+  @moduledoc !"""
+  Decoder for standard representation format for ShapeMaps specified in <https://shexspec.github.io/shape-map/>.
+  """
+
   import ShEx.Utils
 
   alias RDF.{IRI, BlankNode, Literal}
