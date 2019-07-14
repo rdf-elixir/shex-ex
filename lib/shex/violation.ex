@@ -15,16 +15,37 @@ defmodule ShEx.Violation.Shared do
 end
 
 defprotocol ShEx.Violation do
+  @moduledoc """
+  A violation of a shape during validation.
+  """
+
+  @doc """
+  The label of the violation type.
+  """
   def label(violation)
 
+  @doc """
+  A human representation of the reason for the violation.
+  """
   def reason(violation)
-  
+
+  @doc false
   def reason_doc(violation)
 
+  @doc """
+  A human representation of the violation.
+
+  Currently it's the same as the reason, but might contain additional
+  information in the future.
+  """
   defdelegate message(violation), to: ShEx.Violation.Shared
 end
 
 defmodule ShEx.Violation.NodeKindConstraint do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant node constraint.
+  """
+
   defstruct [:node_kind, :node]
 
   defimpl ShEx.Violation do
@@ -39,6 +60,10 @@ defmodule ShEx.Violation.NodeKindConstraint do
 end
 
 defmodule ShEx.Violation.DatatypeConstraint do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant datatype constraint.
+  """
+
   defstruct [:datatype, :node]
 
   defimpl ShEx.Violation do
@@ -53,6 +78,10 @@ defmodule ShEx.Violation.DatatypeConstraint do
 end
 
 defmodule ShEx.Violation.StringFacetConstraint do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant string facet constraint.
+  """
+
   defstruct [:facet_type, :facet_value, :node]
 
   defimpl ShEx.Violation do
@@ -83,6 +112,10 @@ defmodule ShEx.Violation.StringFacetConstraint do
 end
 
 defmodule ShEx.Violation.NumericFacetConstraint do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant numeric facet constraint.
+  """
+
   defstruct [:facet_type, :facet_value, :node]
 
   defimpl ShEx.Violation do
@@ -121,6 +154,10 @@ defmodule ShEx.Violation.NumericFacetConstraint do
 end
 
 defmodule ShEx.Violation.ValuesConstraint do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant values constraint.
+  """
+
   defstruct [:constraint_type, :constraint_value, :node]
 
   defimpl ShEx.Violation do
@@ -152,6 +189,10 @@ defmodule ShEx.Violation.ValuesConstraint do
 end
 
 defmodule ShEx.Violation.MinCardinality do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant minimum cardinality constraint.
+  """
+
   defstruct [:triple_expression, :triple_expression_violations, :cardinality]
 
   defimpl ShEx.Violation do
@@ -215,6 +256,10 @@ defmodule ShEx.Violation.MinCardinality do
 end
 
 defmodule ShEx.Violation.MaxCardinality do
+  @moduledoc """
+  `ShEx.Violation` produced on a nonconformant maximum cardinality constraint.
+  """
+
   defstruct [:triple_expression]
 
   defimpl ShEx.Violation do
@@ -239,6 +284,10 @@ defmodule ShEx.Violation.MaxCardinality do
 end
 
 defmodule ShEx.Violation.ClosedShape do
+  @moduledoc """
+  `ShEx.Violation` produced when unmatched triples where found on a closed shape.
+  """
+
   defstruct [:shape, :unmatchables]
 
   defimpl ShEx.Violation do
@@ -270,6 +319,10 @@ defmodule ShEx.Violation.ClosedShape do
 end
 
 defmodule ShEx.Violation.NegationMatch do
+  @moduledoc """
+  `ShEx.Violation` produced when a negated shape expression matched.
+  """
+
   defstruct [:shape_not]
 
   defimpl ShEx.Violation do
@@ -284,7 +337,14 @@ defmodule ShEx.Violation.NegationMatch do
   end
 end
 
+# TODO: Remove this when this structural error is detected during schema creation.
 defmodule ShEx.Violation.UnknownReference do
+  @moduledoc """
+  `ShEx.Violation` produced on unresolvable expression references.
+
+  Note: This violation will soon be removed, as this will be detected during the creation of the schema.
+  """
+
   defstruct [:expr_ref]
 
   defimpl ShEx.Violation do
