@@ -1,6 +1,9 @@
 defmodule ShEx.Schema do
   @moduledoc """
-  A ShEx schema is a collection of `ShEx.ShapeExpression` that prescribes conditions that RDF data graphs must meet in order to be considered "conformant".
+  A ShEx schema is a collection of ShEx shape expressions that prescribes conditions that RDF data graphs must meet in order to be considered "conformant".
+
+  Usually a `ShEx.Schema` is not created by hand, but read from a ShExC or ShExJ
+  representation via `ShEx.ShExC.decode/2` or `ShEx.ShExJ.decode/2`.
   """
 
   defstruct [
@@ -16,7 +19,9 @@ defmodule ShEx.Schema do
   @flow_opts_defaults Application.get_env(:shex, :flow_opts)
   @flow_opts MapSet.new(~w[max_demand min_demand stages window buffer_keep buffer_size]a)
 
-
+  @doc !"""
+  Creates a `ShEx.Schema`.
+  """
   def new(shapes, start \\ nil, imports \\ nil, start_acts \\ nil) do
     %ShEx.Schema{
       shapes: shapes |> List.wrap() |> Map.new(fn shape -> {shape.id, shape} end),
@@ -26,6 +31,9 @@ defmodule ShEx.Schema do
     }
   end
 
+  @doc """
+  Validates that a `RDF.Data` structure conforms to a `ShEx.Schema` according to a `ShEx.ShapeMap`.
+  """
   def validate(schema, data, shape_map, opts \\ [])
 
   def validate(schema, data, %ShapeMap{type: :query} = shape_map, opts) do
@@ -111,6 +119,7 @@ defmodule ShEx.Schema do
     end)
   end
 
+  @doc false
   def shape_expr_with_id(schema, shape_label) do
     Map.get(schema.shapes, shape_label)
   end
