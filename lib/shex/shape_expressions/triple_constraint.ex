@@ -31,10 +31,11 @@ defmodule ShEx.TripleConstraint do
   end
 
   def matches(triple_constraint, triples, graph, schema, association, state) do
-    with {matched, mismatched, remainder} <-
+    with {matched, mismatched, remainder, violations} <-
            find_matches(triples, triple_constraint, graph, schema, association, state),
          :ok <-
-           check_cardinality(length(matched), triple_constraint.min || 1, triple_constraint)
+           check_cardinality(length(matched),
+             ShEx.TripleExpression.min_cardinality(triple_constraint), triple_constraint, violations)
     do
       {:ok, matched, mismatched ++ remainder}
     else
@@ -45,32 +46,31 @@ defmodule ShEx.TripleConstraint do
 
   defp find_matches(triples, triple_constraint, graph, schema, association, state) do
     do_find_matches(
-      {[], [], triples},
+      {[], [], triples, []},
       triple_constraint.value_expr,
       triple_constraint.predicate,
       triple_constraint.inverse,
-      triple_constraint.max || 1,
+      ShEx.TripleExpression.max_cardinality(triple_constraint),
       {graph, schema, association, state}
     )
   end
 
   defp do_find_matches(acc, value_expr, predicate, inverse, max, match_context)
 
-  defp do_find_matches({matched, mismatched, []}, _, _, _, _, _),
-    do: {matched, mismatched, []}
+  defp do_find_matches({_, _, [], _} = acc, _, _, _, _, _), do: acc
 
-  defp do_find_matches({matched, _, _} = acc, _, _, _, max, _)
+  defp do_find_matches({matched, _, _, _} = acc, _, _, _, max, _)
     when length(matched) == max, do: acc
 
   defp do_find_matches(
-         {matched, mismatched, [{_, predicate, _} = statement | remainder]},
+         {matched, mismatched, [{_, predicate, _} = statement | remainder], violations},
          nil, predicate, inverse, max, match_context) do
-    {[statement | matched], mismatched, remainder}
+    {[statement | matched], mismatched, remainder, violations}
     |> do_find_matches(nil, predicate, inverse, max, match_context)
   end
 
   defp do_find_matches(
-         {matched, mismatched, [{subject, predicate, object} = statement | remainder]},
+         {matched, mismatched, [{subject, predicate, object} = statement | remainder], violations},
          value_expr, predicate, inverse, max,
          {graph, schema, _association, state} = match_context) do
       value = if inverse, do: subject, else: object
@@ -83,17 +83,17 @@ defmodule ShEx.TripleConstraint do
                ShEx.ShapeMap.Association.new(value, value_expr),
                state)
       do
-        {[statement | matched], mismatched, remainder}
+        {[statement | matched], mismatched, remainder, violations}
       else
-        _ ->
-          {matched, [statement | mismatched], remainder}
+      %{status: :nonconformant} = nonconformant ->
+          {matched, [statement | mismatched], remainder, violations ++ List.wrap(nonconformant.reason)}
       end
       |> do_find_matches(value_expr, predicate, inverse, max, match_context)
   end
 
-  defp do_find_matches({matched, mismatched, [statement | remainder]},
+  defp do_find_matches({matched, mismatched, [statement | remainder], violations},
          value_expr, predicate, inverse, max, match_context) do
-    {matched, [statement | mismatched], remainder}
+    {matched, [statement | mismatched], remainder, violations}
     |> do_find_matches(value_expr, predicate, inverse, max, match_context)
   end
 
@@ -102,6 +102,9 @@ defmodule ShEx.TripleConstraint do
     def matches(triple_constraint, triples, graph, schema, association, state) do
       ShEx.TripleConstraint.matches(triple_constraint, triples, graph, schema, association, state)
     end
+
+    def min_cardinality(triple_constraint), do: ShEx.TripleExpression.Shared.min_cardinality(triple_constraint)
+    def max_cardinality(triple_constraint), do: ShEx.TripleExpression.Shared.max_cardinality(triple_constraint)
 
     def predicates(%ShEx.TripleConstraint{predicate: predicate}, _), do: [predicate]
 

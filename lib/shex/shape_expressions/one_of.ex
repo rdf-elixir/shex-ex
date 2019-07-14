@@ -13,10 +13,11 @@ defmodule ShEx.OneOf do
   import ShEx.TripleExpression.Shared
 
   def matches(one_of, triples, graph, schema, association, state) do
-    with {matched, remainder, match_count} <-
+    with {matched, remainder, match_count, violations} <-
            find_matches(triples, one_of, graph, schema, association, state),
          :ok <-
-           check_cardinality(match_count, one_of.min || 1, one_of)
+           check_cardinality(match_count,
+             ShEx.TripleExpression.min_cardinality(one_of), one_of, violations)
     do
       {:ok, matched, remainder}
     else
@@ -26,27 +27,27 @@ defmodule ShEx.OneOf do
   end
 
   defp find_matches(triples, one_of, graph, schema, association, state) do
-    do_find_matches({:ok, [], triples, 0},
-      one_of.expressions, one_of.max || 1, graph, schema, association, state)
+    do_find_matches({:ok, [], triples, 0, []},
+      one_of.expressions, ShEx.TripleExpression.max_cardinality(one_of),
+      graph, schema, association, state)
   end
 
-  defp do_find_matches({:ok, matched, remainder, max}, _, max, _, _, _, _),
-    do: {matched, remainder, max}
+  defp do_find_matches({:ok, matched, remainder, max, violations}, _, max, _, _, _, _),
+    do: {matched, remainder, max, violations}
 
-  defp do_find_matches({:ok, matched, remainder, match_count},
+  defp do_find_matches({:ok, matched, remainder, match_count, violations},
          expressions, max, graph, schema, association, state) do
     expressions
-    |> Enum.reduce_while({matched, remainder, match_count}, fn
-        expression, {matched, remainder, match_count} ->
+    |> Enum.reduce_while({matched, remainder, match_count, violations}, fn
+        expression, {matched, remainder, match_count, violations} ->
           with {:ok, new_matched, new_remainder} <-
                  ShEx.TripleExpression.matches(
                    expression, remainder, graph, schema, association, state)
           do
-            {:halt, {:ok, new_matched, new_remainder, match_count + 1}}
+            {:halt, {:ok, new_matched, new_remainder, match_count + 1, violations}}
           else
-            {:error, error} ->
-              # TODO: Maybe we want to pass the error instead of just providing a min cardinality violation as reason? see the same for EachOf
-              {:cont, {matched, remainder, match_count}}
+            {:error, violation} ->
+              {:cont, {matched, remainder, match_count, violations ++ List.wrap(violation)}}
           end
         end)
     |> do_find_matches(expressions, max, graph, schema, association, state)
@@ -59,6 +60,9 @@ defmodule ShEx.OneOf do
     def matches(one_of, triples, graph, schema, association, state) do
       ShEx.OneOf.matches(one_of, triples, graph, schema, association, state)
     end
+
+    def min_cardinality(one_of), do: ShEx.TripleExpression.Shared.min_cardinality(one_of)
+    def max_cardinality(one_of), do: ShEx.TripleExpression.Shared.max_cardinality(one_of)
 
     def predicates(one_of, state),
       do: ShEx.TripleExpression.Shared.predicates_of_group(one_of, state)

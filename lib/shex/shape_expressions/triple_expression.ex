@@ -8,6 +8,10 @@ defprotocol ShEx.TripleExpression do
   """
   def matches(triple_expression, triples, graph, schema, association, state)
 
+  def min_cardinality(triple_expression)
+
+  def max_cardinality(triple_expression)
+
   def predicates(triple_expression, state)
 
   def triple_constraints(triple_expression, state)
@@ -17,6 +21,19 @@ end
 
 defmodule ShEx.TripleExpression.Shared do
   @moduledoc false
+
+  def min_cardinality(triple_expression), do: triple_expression.min || 1
+  def max_cardinality(triple_expression), do: triple_expression.max || 1
+
+  def check_cardinality(count, min, triple_expression, violations) when count < min do
+    %ShEx.Violation.MinCardinality{
+      triple_expression: triple_expression,
+      triple_expression_violations: violations,
+      cardinality: count
+    }
+  end
+
+  def check_cardinality(_, _, _, _), do: :ok
 
   def triple_constraints_of_group(group, state) do
     group.expressions
@@ -50,13 +67,4 @@ defmodule ShEx.TripleExpression.Shared do
         end
     end)
   end
-
-  def check_cardinality(count, min, triple_expression) when count < min do
-    %ShEx.Violation.MinCardinality{
-      triple_expression: triple_expression,
-      cardinality: count
-    }
-  end
-
-  def check_cardinality(_, _, _), do: :ok
 end

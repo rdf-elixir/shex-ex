@@ -130,7 +130,7 @@ defmodule ShEx.Violation.ValuesConstraint do
 end
 
 defmodule ShEx.Violation.MinCardinality do
-  defstruct [:triple_expression, :cardinality]
+  defstruct [:triple_expression, :triple_expression_violations, :cardinality]
 
   defimpl ShEx.Violation do
     def label(_), do: "Minimum Cardinality Violation"

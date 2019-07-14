@@ -62,13 +62,144 @@ defmodule ShExTest do
           node: ~I<http://example.com/users/Claire>,
           shape: ~I<http://school.example/#Enrollee>,
           status: :nonconformant,
-          reason: [%ShEx.Violation.MinCardinality{cardinality: 0, triple_expression: %ShEx.EachOf{annotations: nil, expressions: [%ShEx.TripleConstraint{annotations: nil, id: nil, inverse: nil, max: nil, min: nil, predicate: ~I<http://xmlns.com/foaf/0.1/age>, sem_acts: nil, value_expr: ~I<http://school.example/#enrolleeAge>}, %ShEx.TripleConstraint{annotations: nil, id: nil, inverse: nil, max: 2, min: 1, predicate: ~I<http://ex.example/#hasGuardian>, sem_acts: nil, value_expr: %ShEx.NodeConstraint{datatype: nil, id: nil, node_kind: "iri", numeric_facets: nil, string_facets: nil, values: nil}}], id: nil, max: nil, min: nil, sem_acts: nil}}],
+          reason: [
+            %ShEx.Violation.MinCardinality{
+              cardinality: 0,
+              triple_expression: %ShEx.EachOf{
+                annotations: nil,
+                expressions: [
+                  %ShEx.TripleConstraint{
+                    annotations: nil,
+                    id: nil,
+                    inverse: nil,
+                    max: nil,
+                    min: nil,
+                    predicate: ~I<http://xmlns.com/foaf/0.1/age>,
+                    sem_acts: nil,
+                    value_expr: ~I<http://school.example/#enrolleeAge>
+                  },
+                  %ShEx.TripleConstraint{
+                    annotations: nil,
+                    id: nil,
+                    inverse: nil,
+                    max: 2,
+                    min: 1,
+                    predicate: ~I<http://ex.example/#hasGuardian>,
+                    sem_acts: nil,
+                    value_expr: %ShEx.NodeConstraint{
+                      datatype: nil,
+                      id: nil,
+                      node_kind: "iri",
+                      numeric_facets: nil,
+                      string_facets: nil,
+                      values: nil
+                    }
+                  }
+                ],
+                id: nil,
+                max: nil,
+                min: nil,
+                sem_acts: nil
+              },
+              triple_expression_violations: [
+                %ShEx.Violation.MinCardinality{
+                  cardinality: 0,
+                  triple_expression: %ShEx.TripleConstraint{
+                    annotations: nil,
+                    id: nil,
+                    inverse: nil,
+                    max: nil,
+                    min: nil,
+                    predicate: ~I<http://xmlns.com/foaf/0.1/age>,
+                    sem_acts: nil,
+                    value_expr: ~I<http://school.example/#enrolleeAge>
+                  },
+                  triple_expression_violations: [
+                    %ShEx.Violation.NumericFacetConstraint{
+                      facet_type: :mininclusive,
+                      facet_value: %RDF.Literal{
+                        value: Decimal.from_float(13.0),
+                        datatype: ~I<http://www.w3.org/2001/XMLSchema#decimal>
+                      },
+                      node: %RDF.Literal{
+                        value: 12,
+                        datatype: ~I<http://www.w3.org/2001/XMLSchema#integer>
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         },
         %ShEx.ShapeMap.Association{
           node: ~I<http://example.com/users/Don>,
           shape: ~I<http://school.example/#Enrollee>,
           status: :nonconformant,
-          reason: [%ShEx.Violation.MinCardinality{cardinality: 0, triple_expression: %ShEx.EachOf{annotations: nil, expressions: [%ShEx.TripleConstraint{annotations: nil, id: nil, inverse: nil, max: nil, min: nil, predicate: ~I<http://xmlns.com/foaf/0.1/age>, sem_acts: nil, value_expr: ~I<http://school.example/#enrolleeAge>}, %ShEx.TripleConstraint{annotations: nil, id: nil, inverse: nil, max: 2, min: 1, predicate: ~I<http://ex.example/#hasGuardian>, sem_acts: nil, value_expr: %ShEx.NodeConstraint{datatype: nil, id: nil, node_kind: "iri", numeric_facets: nil, string_facets: nil, values: nil}}], id: nil, max: nil, min: nil, sem_acts: nil}}],
+          reason: [
+            %ShEx.Violation.MinCardinality{
+              cardinality: 0,
+              triple_expression: %ShEx.EachOf{
+                annotations: nil,
+                expressions: [
+                  %ShEx.TripleConstraint{
+                    annotations: nil,
+                    id: nil,
+                    inverse: nil,
+                    max: nil,
+                    min: nil,
+                    predicate: ~I<http://xmlns.com/foaf/0.1/age>,
+                    sem_acts: nil,
+                    value_expr: ~I<http://school.example/#enrolleeAge>
+                  },
+                  %ShEx.TripleConstraint{
+                    annotations: nil,
+                    id: nil,
+                    inverse: nil,
+                    max: 2,
+                    min: 1,
+                    predicate: ~I<http://ex.example/#hasGuardian>,
+                    sem_acts: nil,
+                    value_expr: %ShEx.NodeConstraint{
+                      datatype: nil,
+                      id: nil,
+                      node_kind: "iri",
+                      numeric_facets: nil,
+                      string_facets: nil,
+                      values: nil
+                    }
+                  }
+                ],
+                id: nil,
+                max: nil,
+                min: nil,
+                sem_acts: nil
+              },
+              triple_expression_violations: [
+                %ShEx.Violation.MinCardinality{
+                  cardinality: 0,
+                  triple_expression: %ShEx.TripleConstraint{
+                    annotations: nil,
+                    id: nil,
+                    inverse: nil,
+                    max: 2,
+                    min: 1,
+                    predicate: ~I<http://ex.example/#hasGuardian>,
+                    sem_acts: nil,
+                    value_expr: %ShEx.NodeConstraint{
+                      datatype: nil,
+                      id: nil,
+                      node_kind: "iri",
+                      numeric_facets: nil,
+                      string_facets: nil,
+                      values: nil
+                    }
+                  },
+                  triple_expression_violations: []
+                }
+              ]
+            }
+          ]
         }
       ],
     }
