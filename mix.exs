@@ -24,6 +24,10 @@ defmodule ShEx.MixProject do
       {:rdf, path: "../rdf"},
       {:flow, "~> 0.14"},
       {:jason, "~> 1.1"},
+
+      # Development
+      {:credo, "~> 1.1",   only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.20", only: :dev, runtime: false},
     ]
   end
 
