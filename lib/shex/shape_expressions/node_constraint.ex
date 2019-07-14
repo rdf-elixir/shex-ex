@@ -19,8 +19,8 @@ defmodule ShEx.NodeConstraint do
   def node_kinds(), do: @node_kinds
 
   def satisfies(node_constraint, association) do
-    with node = association.node,
-         :ok <- node_satisfies_node_kind_constraint(node_constraint.node_kind, node),
+    node = association.node
+    with :ok <- node_satisfies_node_kind_constraint(node_constraint.node_kind, node),
          :ok <- node_satisfies_datatype_constraint(node_constraint.datatype, node),
          :ok <- ShEx.NodeConstraint.StringFacets.satisfies(node_constraint.string_facets, node),
          :ok <- ShEx.NodeConstraint.NumericFacets.satisfies(node_constraint.numeric_facets, node),

@@ -24,8 +24,8 @@ defmodule ShEx.ShExC.Decoder do
 
   def decode(content, opts \\ []) do
     with {:ok, tokens, _} <- tokenize(content),
-         {:ok, ast} <- parse(tokens),
-         base = Keyword.get(opts, :base) do
+         {:ok, ast} <- parse(tokens) do
+      base = Keyword.get(opts, :base)
       build_schema(ast, base && RDF.iri(base))
     else
       {:error, {error_line, :shexc_lexer, error_descriptor}, _error_line_again} ->
@@ -44,9 +44,9 @@ defmodule ShEx.ShExC.Decoder do
   defp parse(tokens), do: tokens |> :shexc_parser.parse()
 
   defp build_schema({:shex_doc, directives_ast, start_acts_ast, statements_ast}, base) do
-    with state = %State{base_iri: base},
-         all_statements = directives_ast ++ statements_ast,
-         {:ok, statements, imports} <-
+    state = %State{base_iri: base}
+    all_statements = directives_ast ++ statements_ast
+    with {:ok, statements, imports} <-
            extract_imports(all_statements, state),
          {:ok, statements, start} <-
            extract_start(statements, state),
@@ -93,9 +93,8 @@ defmodule ShEx.ShExC.Decoder do
       if IRI.absolute?(iri) do
         State.add_namespace(state, ns, iri)
       else
-        with absolute_iri = IRI.absolute(iri, state.base_iri) do
-          State.add_namespace(state, ns, to_string(absolute_iri))
-        end
+        State.add_namespace(state, ns,
+          iri |> IRI.absolute(state.base_iri) |> to_string())
       end
     }
   end
@@ -137,9 +136,7 @@ defmodule ShEx.ShExC.Decoder do
              if IRI.absolute?(iri) do
                iri
              else
-               with absolute_iri = IRI.absolute(iri, state.base_iri) do
-                 to_string(absolute_iri)
-               end
+               iri |> IRI.absolute(state.base_iri) |> to_string()
              end
              | imports
            ], state}
@@ -155,10 +152,9 @@ defmodule ShEx.ShExC.Decoder do
     with {statements, start, _} when statements != :error <-
            Enum.reduce_while(statements_ast, {[], nil, state}, fn
              {:start, inline_shape_expression}, {statements, nil, state} ->
-               with {:ok, shape} <- build_shape_expression(inline_shape_expression, state) do
-                 {:cont, {statements, shape, state}}
-               else
-                 error -> {:halt, error}
+               case build_shape_expression(inline_shape_expression, state) do
+                 {:ok, shape} -> {:cont, {statements, shape, state}}
+                 error        -> {:halt, error}
                end
 
              {:start, _inline_shape_expression}, {_statements, _start, _state} ->
@@ -442,16 +438,17 @@ defmodule ShEx.ShExC.Decoder do
     xs_facets_ast
     |> List.wrap()
     |> Enum.reduce_while({:ok, %{}}, fn xs_facet_ast, {:ok, xs_facets} ->
-      case xs_facet(xs_facet_ast, state) do
-        {:ok, xs_facet} ->
-          if (conflicts = Map.take(xs_facets, Map.keys(xs_facet))) == %{} do
-            {:cont, {:ok, Map.merge(xs_facets, xs_facet)}}
-          else
-            {:halt, {:error, "multiple occurrences of the same xsFacet: #{conflicts |> Map.keys |> Enum.join(", ")}}"}}
-          end
-        {:error, _} = error ->
-          {:halt, error}
-      end
+         case xs_facet(xs_facet_ast, state) do
+           {:ok, xs_facet} ->
+             conflicts = Map.take(xs_facets, Map.keys(xs_facet))
+             if conflicts == %{} do
+               {:cont, {:ok, Map.merge(xs_facets, xs_facet)}}
+             else
+               {:halt, {:error, "multiple occurrences of the same xsFacet: #{conflicts |> Map.keys |> Enum.join(", ")}}"}}
+             end
+           {:error, _} = error ->
+             {:halt, error}
+         end
     end)
   end
 
@@ -621,7 +618,7 @@ defmodule ShEx.ShExC.Decoder do
   end
 
   defp build_node({{:string_literal_quote, _line, value}, {:datatype, datatype}}, state) do
-    with {:ok, datatype} = build_node(datatype, state) do
+    with {:ok, datatype} <- build_node(datatype, state) do
       {:ok, RDF.literal(value, datatype: datatype)}
     end
   end

@@ -25,11 +25,9 @@ defmodule ShEx.ShExC do
   Same as `decode/2` but returns the schema directly (not in an `ok` tuple).
   """
   def decode!(content, opts \\ []) do
-    with {:ok, schema} <- decode(content, opts) do
-      schema
-    else
-      {:error, error} ->
-        raise error
+    case decode(content, opts) do
+      {:ok, schema}   -> schema
+      {:error, error} -> raise error
     end
   end
 end

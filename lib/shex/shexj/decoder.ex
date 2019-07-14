@@ -109,8 +109,8 @@ defmodule ShEx.ShExJ.Decoder do
 
   defp to_shape_expression(%{type: type} = shape_expression_combinator, options)
        when type in ~w[ShapeOr ShapeAnd] do
-    with type_mod = Module.concat([ShEx, type]),
-         {:ok, id} <-
+    type_mod = Module.concat([ShEx, type])
+    with {:ok, id} <-
            shape_expression_combinator
            |> Map.get(:id)
            |> if_present(&to_shape_expression_label/2, options),
@@ -220,8 +220,8 @@ defmodule ShEx.ShExJ.Decoder do
 
   defp to_triple_expression(%{type: type} = triple_expression_combinator, options)
        when type in ~w[EachOf OneOf] do
-    with type_mod = Module.concat([ShEx, type]),
-         {:ok, id} <-
+    type_mod = Module.concat([ShEx, type])
+    with {:ok, id} <-
            triple_expression_combinator
            |> Map.get(:id)
            |> if_present(&to_triple_expression_label/2, options),
@@ -432,9 +432,9 @@ defmodule ShEx.ShExJ.Decoder do
     Jason.decode(content, keys: :atoms!)
   rescue
     error in [ArgumentError] ->
-      with [{:erlang, :binary_to_existing_atom, [bad_property, _], []} | _] <- __STACKTRACE__ do
-        {:error, "invalid ShExJ property: #{bad_property}"}
-      else
+      case __STACKTRACE__ do
+        [{:erlang, :binary_to_existing_atom, [bad_property, _], []} | _] ->
+          {:error, "invalid ShExJ property: #{bad_property}"}
         _ ->
           reraise error, __STACKTRACE__
       end

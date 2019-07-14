@@ -10,14 +10,13 @@ defmodule ShEx.ShapeOr do
     def satisfies(shape_or, graph, schema, association, state) do
       shape_or.shape_exprs
       |> Enum.reduce_while({[], []}, fn expression, {reasons, app_infos} ->
-           with %{status: :conformant} <-
-                  ShEx.ShapeExpression.satisfies(expression, graph, schema, association, state)
-           do
-             {:halt, :ok}
-           else
-             %{reason: reason, app_info: app_info} ->
-               {:cont, {reasons ++ List.wrap(reason), [app_info | app_infos]}}
-           end
+           ShEx.ShapeExpression.satisfies(expression, graph, schema, association, state)
+           |> case do
+                %{status: :conformant} ->
+                  {:halt, :ok}
+                %{reason: reason, app_info: app_info} ->
+                  {:cont, {reasons ++ List.wrap(reason), [app_info | app_infos]}}
+              end
          end)
       |> case do
            :ok ->

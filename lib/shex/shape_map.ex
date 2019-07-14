@@ -208,14 +208,13 @@ defmodule ShEx.ShapeMap do
   end
 
   def add(shape_map, association) do
-    with association = Association.new(association) do
-      shape_map
-      |> Map.update!(association.status || :conformant, fn
-           nil  -> [association]
-           list -> [association | list]
-         end)
-      |> update_type(association)
-    end
+    association = Association.new(association)
+    shape_map
+    |> Map.update!(association.status || :conformant, fn
+         nil  -> [association]
+         list -> [association | list]
+       end)
+    |> update_type(association)
   end
 
   defp update_type((%__MODULE__{type: :fixed, nonconformant: nonconformant}) = shape_map, _)

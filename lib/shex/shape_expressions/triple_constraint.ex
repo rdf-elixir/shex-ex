@@ -75,19 +75,20 @@ defmodule ShEx.TripleConstraint do
          {graph, schema, _association, state} = match_context) do
       value = if inverse, do: subject, else: object
 
-      with %{status: :conformant} <-
-             ShEx.ShapeExpression.satisfies(
+      ShEx.ShapeExpression.satisfies(
                value_expr,
                graph,
                schema,
                ShEx.ShapeMap.Association.new(value, value_expr),
                state)
-      do
-        {[statement | matched], mismatched, remainder, violations}
-      else
-      %{status: :nonconformant} = nonconformant ->
-          {matched, [statement | mismatched], remainder, violations ++ List.wrap(nonconformant.reason)}
-      end
+      |> case do
+           %{status: :conformant} ->
+             {[statement | matched], mismatched, remainder, violations}
+
+           %{status: :nonconformant} = nonconformant ->
+             {matched, [statement | mismatched], remainder, violations ++
+               List.wrap(nonconformant.reason)}
+         end
       |> do_find_matches(value_expr, predicate, inverse, max, match_context)
   end
 

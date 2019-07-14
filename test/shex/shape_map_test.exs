@@ -209,7 +209,7 @@ defmodule ShEx.ShapeMapTest do
 
   describe "Enumerable protocol" do
     test "Enum.count" do
-      assert Enum.count(ShapeMap.new) == 0
+      assert Enum.empty?(ShapeMap.new)
       assert Enum.count(@conformant_fixed_shape_map) == 1
       assert Enum.count(@nonconformant_fixed_shape_map) == 2
     end

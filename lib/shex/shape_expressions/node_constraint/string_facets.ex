@@ -18,9 +18,9 @@ defmodule ShEx.NodeConstraint.StringFacets do
   def satisfies(nil, _), do: :ok
 
   def satisfies(string_facets, node) do
-    with lex = lexical_form(node),
-         len = String.length(lex),
-         true <- satisfies_string_length(string_facets.length, len),
+    lex = lexical_form(node)
+    len = String.length(lex)
+    with true <- satisfies_string_length(string_facets.length, len),
          true <- satisfies_string_minlength(string_facets.minlength, len),
          true <- satisfies_string_maxlength(string_facets.maxlength, len),
          true <- satisfies_string_pattern(string_facets, lex)

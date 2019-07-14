@@ -40,15 +40,15 @@ defmodule ShEx.OneOf do
     expressions
     |> Enum.reduce_while({matched, remainder, match_count, violations}, fn
         expression, {matched, remainder, match_count, violations} ->
-          with {:ok, new_matched, new_remainder} <-
-                 ShEx.TripleExpression.matches(
-                   expression, remainder, graph, schema, association, state)
-          do
-            {:halt, {:ok, new_matched, new_remainder, match_count + 1, violations}}
-          else
-            {:error, violation} ->
-              {:cont, {matched, remainder, match_count, violations ++ List.wrap(violation)}}
-          end
+          ShEx.TripleExpression.matches(
+            expression, remainder, graph, schema, association, state)
+          |> case do
+               {:ok, new_matched, new_remainder} ->
+                 {:halt, {:ok, new_matched, new_remainder, match_count + 1, violations}}
+
+               {:error, violation} ->
+                 {:cont, {matched, remainder, match_count, violations ++ List.wrap(violation)}}
+             end
         end)
     |> do_find_matches(expressions, max, graph, schema, association, state)
   end

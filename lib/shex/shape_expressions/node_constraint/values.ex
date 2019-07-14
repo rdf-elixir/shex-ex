@@ -30,11 +30,9 @@ defmodule ShEx.NodeConstraint.Values do
 
   def satisfies(values, node) do
     Enum.reduce_while(values, [], fn value, violations ->
-      with :ok <- satisfies_value(value, node) do
-        {:halt, :ok}
-      else
-        violation ->
-          {:cont, [violation | violations]}
+      case satisfies_value(value, node) do
+        :ok       -> {:halt, :ok}
+        violation -> {:cont, [violation | violations]}
       end
     end)
   end
