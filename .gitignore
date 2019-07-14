@@ -24,3 +24,5 @@ shex-*.tar
 
 /src/*_lexer.erl
 /src/*_parser.erl
+
+.tool-versions*
