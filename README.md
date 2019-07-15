@@ -1,5 +1,10 @@
 # ShEx.ex
 
+[![Travis](https://img.shields.io/travis/marcelotto/shex-ex.svg?style=flat-square)](https://travis-ci.org/marcelotto/shex-ex)
+[![Hex.pm](https://img.shields.io/hexpm/v/shex.svg?style=flat-square)](https://hex.pm/packages/shex)
+[![Inline docs](http://inch-ci.org/github/marcelotto/shex-ex.svg)](http://inch-ci.org/github/marcelotto/shex-ex)
+
+
 An implementation of the [ShEx] specification in Elixir.
 
 It allows to run validations specified in the Shape Expressions language (ShEx) on RDF graphs.
