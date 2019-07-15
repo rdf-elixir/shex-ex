@@ -12,6 +12,8 @@ It allows to run validations specified in the Shape Expressions language (ShEx) 
 
 -- [Shape Expressions (ShEx) Primer](http://shex.io/shex-primer/#tripleConstraints)
 
+The processing of large amounts of nodes can be run in parallel (still experimental, therefore explicitly to be turned on).
+
 For more about ShEx.ex and it's related projects, go to <https://rdf-elixir.dev>.
 
 
@@ -19,6 +21,7 @@ For more about ShEx.ex and it's related projects, go to <https://rdf-elixir.dev>
 ## Limitations
 
 - the following ShEx features are not implemented yet:
+    - structural schema validations on schema creation time
     - imports
     - external shapes
     - annotations
