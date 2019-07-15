@@ -213,7 +213,7 @@ defmodule ShEx.TestSuiteTest do
           assert {:ok, shape_map} =
                    shape_map_file
                    |> File.read!()
-                   |> ShEx.ShapeMap.JSON.decode()
+                   |> ShEx.ShapeMap.from_json()
           shape_map
         else
           shape =
@@ -260,7 +260,7 @@ defmodule ShEx.TestSuiteTest do
                expected_result_file
                |> ShEx.TestSuite.file()
                |> File.read!()
-               |> ShEx.ShapeMap.JSON.decode()
+               |> ShEx.ShapeMap.from_json()
 
       assert %ShEx.ShapeMap{} = ShEx.validate(graph, schema, shape_map)
     end
