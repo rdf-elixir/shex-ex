@@ -46,8 +46,7 @@ defmodule ShEx.Schema do
     start = start_shape_expr(schema)
     state = %{
       ref_stack: [],
-      labeled_triple_expressions:
-        schema.shapes |> Map.values() |> labeled_triple_expressions()
+      labeled_triple_expressions: labeled_triple_expressions([schema])
     }
 
     if par_opts = parallelization_options(shape_map, data, opts) do
@@ -134,4 +133,10 @@ defmodule ShEx.Schema do
 
   defp shape_expr(_, :start, start_expr), do: start_expr
   defp shape_expr(schema, shape_label, _), do: shape_expr_with_id(schema, shape_label)
+
+
+  defimpl ShEx.Operator do
+    def triple_expression_label_and_operands(schema),
+      do: {nil, Map.values(schema.shapes)}
+  end
 end
