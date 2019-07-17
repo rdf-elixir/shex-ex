@@ -12,8 +12,11 @@ defmodule ShEx.ShapeExpressionReference do
       :circular_reference ->
         ShEx.ShapeMap.Association.conform(association)
       nil ->
-        ShEx.ShapeMap.Association.violation(association,
-          %ShEx.Violation.UnknownReference{expr_ref: expr_ref})
+        raise """
+          Error: Unknown reference #{expr_ref}
+          This should have been detected during schema creation.
+          Please raise an issue at https://github.com/marcelotto/shex-ex/issues
+          """
     end
   end
 
@@ -39,9 +42,11 @@ defimpl ShEx.ShapeExpression, for: RDF.BlankNode do
 end
 
 defimpl ShEx.Operator, for: RDF.IRI do
+  def children(_), do: raise "This should never be called"
   def triple_expression_label_and_operands(_), do: {nil, []}
 end
 
 defimpl ShEx.Operator, for: RDF.BlankNode do
+  def children(_), do: raise "This should never be called"
   def triple_expression_label_and_operands(_), do: {nil, []}
 end

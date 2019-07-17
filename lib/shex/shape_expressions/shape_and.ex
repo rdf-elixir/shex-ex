@@ -15,6 +15,16 @@ defmodule ShEx.ShapeAnd do
   end
 
   defimpl ShEx.Operator do
+    def children(shape_and) do
+      Enum.map(shape_and.shape_exprs, fn expression ->
+        if RDF.term?(expression) do
+          {:shape_expression_label, expression}
+        else
+          expression
+        end
+      end)
+    end
+
     def triple_expression_label_and_operands(shape_and), do: {nil, shape_and.shape_exprs}
   end
 end

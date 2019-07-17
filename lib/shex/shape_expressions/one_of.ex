@@ -75,6 +75,16 @@ defmodule ShEx.OneOf do
   end
 
   defimpl ShEx.Operator do
+    def children(one_of) do
+      Enum.map(one_of.expressions, fn expression ->
+        if RDF.term?(expression) do
+          {:triple_expression_label, expression}
+        else
+          expression
+        end
+      end)
+    end
+
     def triple_expression_label_and_operands(one_of),
       do: {one_of.id, one_of.expressions}
   end

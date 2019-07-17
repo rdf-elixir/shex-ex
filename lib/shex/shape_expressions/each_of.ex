@@ -75,6 +75,16 @@ defmodule ShEx.EachOf do
   end
 
   defimpl ShEx.Operator do
+    def children(each_of) do
+      Enum.map(each_of.expressions, fn expression ->
+        if RDF.term?(expression) do
+          {:triple_expression_label, expression}
+        else
+          expression
+        end
+      end)
+    end
+
     def triple_expression_label_and_operands(each_of),
       do: {each_of.id, each_of.expressions}
   end

@@ -63,6 +63,42 @@ defmodule ShEx.TestSuiteTest do
   end
 
 
+  describe "negativeStructure" do
+    TestSuite.test_cases("negativeStructure")
+    |> Enum.each(fn test_case ->
+      [
+        "1focusRefANDSelfdot",
+        "Cycle2Extra",
+        "1ShapeProductionCollision",
+        "Cycle1Negation1",
+        "Cycle1Negation2",
+        "Cycle1Negation3",
+        "Cycle2Negation",
+        "TwoNegation",
+        "TwoNegation2",
+      ]
+      |> Enum.each(fn test_subject ->
+        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+           do: @tag skip: "TODO: "
+      end)
+
+      @tag test_case: test_case
+      test TestSuite.test_case_title(test_case), %{test_case: test_case} do
+        negative_structure_test(test_case)
+      end
+    end)
+
+    defp negative_structure_test(test_case) do
+      assert {:error, _} =
+               test_case
+               |> ShEx.TestSuite.test_case_file(:shex)
+               |> ShEx.TestSuite.file()
+               |> File.read!()
+               |> ShEx.ShExC.Decoder.decode()
+    end
+  end
+
+
   @validation_manifest ShEx.TestSuite.manifest_graph("validation")
   @validation_base_iri "https://raw.githubusercontent.com/shexSpec/shexTest/master/validation/manifest" # TODO: This should be the @validation_manifest.base_iri
 

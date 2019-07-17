@@ -29,7 +29,7 @@ defmodule ShEx.ShExJ.Decoder do
            |> Map.get(:startActs, [])
            |> map(&to_semantic_action/2, options)
            |> empty_to_nil() do
-      {:ok, ShEx.Schema.new(shapes, start, imports, start_acts)}
+      ShEx.Schema.new(shapes, start, imports, start_acts)
     end
   end
 

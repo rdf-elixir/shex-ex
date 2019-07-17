@@ -336,24 +336,3 @@ defmodule ShEx.Violation.NegationMatch do
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
   end
 end
-
-# TODO: Remove this when this structural error is detected during schema creation.
-defmodule ShEx.Violation.UnknownReference do
-  @moduledoc """
-  `ShEx.Violation` produced on unresolvable expression references.
-
-  Note: This violation will soon be removed, as this will be detected during the creation of the schema.
-  """
-
-  defstruct [:expr_ref]
-
-  defimpl ShEx.Violation do
-    def label(_), do: "Unknown Reference"
-
-    def reason(violation) do
-      "couldn't resolve #{inspect violation.expr_ref}"
-    end
-
-    defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
-  end
-end

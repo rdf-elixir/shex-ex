@@ -29,6 +29,13 @@ defmodule ShEx.Schema do
       imports: imports,
       start_acts: start_acts
     }
+    |> validate()
+  end
+
+  defp validate(schema) do
+    with :ok <- check_refs(schema, labeled_triple_expressions([schema])) do
+      {:ok, schema}
+    end
   end
 
   @doc """
@@ -54,12 +61,9 @@ defmodule ShEx.Schema do
       |> ShapeMap.associations()
       |> Flow.from_enumerable(par_opts)
       |> Flow.map(fn association ->
-           if shape = shape_expr(schema, association.shape, start) do
-             ShapeExpression.satisfies(shape, data, schema, association, state)
-           else
-             ShapeMap.Association.violation(association,
-               %ShEx.Violation.UnknownReference{expr_ref: association.shape})
-           end
+           schema
+           |> shape_expr(association.shape, start)
+           |> ShapeExpression.satisfies(data, schema, association, state)
       end)
       |> Enum.reduce(%ShapeMap{type: :result}, fn association, shape_map ->
            ShapeMap.add(shape_map, association)
@@ -68,16 +72,10 @@ defmodule ShEx.Schema do
       shape_map
       |> ShapeMap.associations()
       |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
-           if shape = shape_expr(schema, association.shape, start) do
-             ShapeMap.add(result_shape_map,
-               ShapeExpression.satisfies(shape, data, schema, association, state)
-             )
-           else
-             ShapeMap.add(result_shape_map,
-               ShapeMap.Association.violation(association,
-                 %ShEx.Violation.UnknownReference{expr_ref: association.shape})
-             )
-           end
+           shape = shape_expr(schema, association.shape, start)
+           ShapeMap.add(result_shape_map,
+             ShapeExpression.satisfies(shape, data, schema, association, state)
+           )
          end)
     end
   end
@@ -94,6 +92,26 @@ defmodule ShEx.Schema do
 
   defp flow_opts_defaults(shape_map, data, opts) do
     @flow_opts_defaults || [] # TODO: provide sensible defaults based on the input
+  end
+
+  defp check_refs(schema, labeled_triple_expressions) do
+    ShEx.Operator.check(schema, fn
+      {:shape_expression_label, id} ->
+        if schema.shapes[id] do
+          :ok
+        else
+          {:error, "couldn't resolve shape expression reference #{inspect id}"}
+        end
+
+      {:triple_expression_label, id} ->
+        if labeled_triple_expressions[id] do
+          :ok
+        else
+          {:error, "couldn't resolve triple expression reference #{inspect id}"}
+        end
+
+      _ -> :ok
+    end)
   end
 
   defp labeled_triple_expressions(operators) do
@@ -136,7 +154,11 @@ defmodule ShEx.Schema do
 
 
   defimpl ShEx.Operator do
+    def children(schema) do
+      Map.values(schema.shapes)
+    end
+
     def triple_expression_label_and_operands(schema),
-      do: {nil, Map.values(schema.shapes)}
+      do: {nil, children(schema)}
   end
 end

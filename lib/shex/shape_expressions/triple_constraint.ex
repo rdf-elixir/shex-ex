@@ -116,6 +116,19 @@ defmodule ShEx.TripleConstraint do
   end
 
   defimpl ShEx.Operator do
+    def children(triple_constraint) do
+      cond do
+        is_nil(triple_constraint.value_expr) ->
+          []
+
+        RDF.term?(triple_constraint.value_expr) ->
+          [{:shape_expression_label, triple_constraint.value_expr}]
+
+        true ->
+          [triple_constraint.value_expr]
+      end
+    end
+
     def triple_expression_label_and_operands(triple_constraint),
       do: {triple_constraint.id, List.wrap(triple_constraint.value_expr)}
   end

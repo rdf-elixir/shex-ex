@@ -118,6 +118,19 @@ defmodule ShEx.Shape do
   end
 
   defimpl ShEx.Operator do
+    def children(shape) do
+      cond do
+        is_nil(shape.expression) ->
+          []
+
+        RDF.term?(shape.expression) ->
+          [{:triple_expression_label, shape.expression}]
+
+       true ->
+        [shape.expression]
+      end
+    end
+
     def triple_expression_label_and_operands(shape), do: {nil, List.wrap(shape.expression)}
   end
 end

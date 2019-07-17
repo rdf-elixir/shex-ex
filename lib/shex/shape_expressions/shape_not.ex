@@ -19,6 +19,15 @@ defmodule ShEx.ShapeNot do
   end
 
   defimpl ShEx.Operator do
+    def children(shape_not) do
+      if RDF.term?(shape_not.shape_expr) do
+        {:shape_expression_label, shape_not.shape_expr}
+      else
+        shape_not.shape_expr
+      end
+      |> List.wrap()
+    end
+
     def triple_expression_label_and_operands(shape_not), do: {nil, [shape_not.shape_expr]}
   end
 end

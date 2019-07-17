@@ -62,14 +62,12 @@ defmodule ShEx.ShExC.Decoder do
                {:error, _} = error -> {:halt, error}
              end
            end) do
-      {:ok,
-        ShEx.Schema.new(
-          unless(Enum.empty?(shapes), do: Enum.reverse(shapes)),
-          start,
-          unless(Enum.empty?(imports), do: imports),
-          start_acts
-        )
-       }
+      ShEx.Schema.new(
+        unless(Enum.empty?(shapes), do: Enum.reverse(shapes)),
+        start,
+        unless(Enum.empty?(imports), do: imports),
+        start_acts
+      )
     end
   end
 
