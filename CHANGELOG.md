@@ -14,6 +14,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 	- unsatisfied references
 	- collisions of triple expression labels with shape expression labels
 
+### Fixed
+
+- Resolving queries in a query ShapeMap sometimes failed when queries had no results  
+
 
 [Compare v0.1.0...HEAD](https://github.com/marcelotto/shex-ex/compare/v0.1.0...HEAD)
 

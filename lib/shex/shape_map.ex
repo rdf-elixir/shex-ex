@@ -337,9 +337,11 @@ defmodule ShEx.ShapeMap do
   end
 
   defp do_resolve_triple_pattern({subject, predicate, :focus}, graph) do
-    graph
-    |> RDF.Graph.description(subject)
-    |> RDF.Description.get(predicate, [])
+    if description = RDF.Graph.description(graph, subject) do
+      RDF.Description.get(description, predicate, [])
+    else
+      []
+    end
   end
 
   defp do_resolve_triple_pattern({:focus, predicate, object}, graph) do
