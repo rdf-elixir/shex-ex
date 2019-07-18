@@ -110,7 +110,16 @@ defmodule ShEx.Schema do
           {:error, "couldn't resolve triple expression reference #{inspect id}"}
         end
 
-      _ -> :ok
+      operator ->
+        if ShEx.TripleExpression.impl_for(operator) && Map.has_key?(operator, :id) do
+          if is_nil(schema.shapes[operator.id]) do
+            :ok
+          else
+            {:error, "#{inspect operator.id} can't be a shape expression label and a triple expression label"}
+          end
+        else
+          :ok
+        end
     end)
   end
 

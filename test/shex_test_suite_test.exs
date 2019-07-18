@@ -69,7 +69,6 @@ defmodule ShEx.TestSuiteTest do
       [
         "1focusRefANDSelfdot",
         "Cycle2Extra",
-        "1ShapeProductionCollision",
         "Cycle1Negation1",
         "Cycle1Negation2",
         "Cycle1Negation3",
