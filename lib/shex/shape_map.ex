@@ -176,9 +176,23 @@ defmodule ShEx.ShapeMap do
   @doc """
   Loads a ShapeMap from the standard representation format.
 
+  Returns an `ok` resp. `error` tuple.
+
   See <https://shexspec.github.io/shape-map/>
   """
   defdelegate decode(content, opts \\ []), to: ShEx.ShapeMap.Decoder
+
+  @doc """
+  Loads a ShapeMap from the standard representation format and fails in the error case.
+
+  Same as `decode/2` but returns the ShapeMap directly (not in an `ok` tuple).
+  """
+  def decode!(content, opts \\ []) do
+    case decode(content, opts) do
+      {:ok, shape_map} -> shape_map
+      {:error, error}  -> raise error
+    end
+  end
 
   @doc """
   Loads a ShapeMap from a JSON representation.

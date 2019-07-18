@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added 
 
+- `ShEx.ShapeMap.decode!/2`
 - Various checks during schema parsing and creation:
 	- unsatisfied references
 	- collisions of triple expression labels with shape expression labels
