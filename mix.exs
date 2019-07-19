@@ -62,7 +62,7 @@ defmodule ShEx.MixProject do
 
       # Development
       {:credo, "~> 1.1",   only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.20", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
     ]
   end
 
