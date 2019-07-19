@@ -91,7 +91,7 @@ defmodule ShEx.Schema do
   end
 
   defp flow_opts_defaults(shape_map, data, opts) do
-    @flow_opts_defaults || [] # TODO: provide sensible defaults based on the input
+    @flow_opts_defaults || [max_demand: 3]
   end
 
   defp check_refs(schema, labeled_triple_expressions) do

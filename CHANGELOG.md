@@ -7,8 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## Unreleased
 
-### Added 
+### Added
 
+- Proper default options for the parallelized validation 
 - `ShEx.ShapeMap.decode!/2`
 - Various checks during schema parsing and creation:
 	- unsatisfied references
