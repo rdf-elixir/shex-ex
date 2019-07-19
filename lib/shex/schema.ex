@@ -15,7 +15,7 @@ defmodule ShEx.Schema do
 
   alias ShEx.{ShapeMap, ShapeExpression}
 
-  @parallel_default Application.get_env(:shex, :parallel, false)
+  @parallel_default Application.get_env(:shex, :parallel)
   @flow_opts_defaults Application.get_env(:shex, :flow_opts)
   @flow_opts MapSet.new(~w[max_demand min_demand stages window buffer_keep buffer_size]a)
 
@@ -81,7 +81,7 @@ defmodule ShEx.Schema do
   end
 
   defp parallelization_options(shape_map, data, opts) do
-    if Keyword.get(opts, :parallel, @parallel_default) do
+    if use_parallelization?(Keyword.get(opts, :parallel, @parallel_default), shape_map) do
       if opts |> Keyword.keys() |> MapSet.new() |> MapSet.disjoint?(@flow_opts) do
         flow_opts_defaults(shape_map, data, opts)
       else
@@ -89,6 +89,12 @@ defmodule ShEx.Schema do
       end
     end
   end
+
+  defp use_parallelization?(nil, shape_map) do
+    shape_map.type == :query or Enum.count(shape_map) > 10
+  end
+
+  defp use_parallelization?(parallel, _), do: parallel
 
   defp flow_opts_defaults(shape_map, data, opts) do
     @flow_opts_defaults || [max_demand: 3]

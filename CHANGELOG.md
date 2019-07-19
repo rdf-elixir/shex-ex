@@ -15,6 +15,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 	- unsatisfied references
 	- collisions of triple expression labels with shape expression labels
 
+### Changed
+
+- Parallelization is now turned on automatically for all query ShapeMaps and  
+  fixed ShapeMaps with more than 10 associations
+
 ### Fixed
 
 - Resolving queries in a query ShapeMap sometimes failed when queries had no results  
