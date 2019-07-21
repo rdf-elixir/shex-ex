@@ -1,3 +1,5 @@
+<img src="shex-logo.png" align="right" />
+
 # ShEx.ex
 
 [![Travis](https://img.shields.io/travis/marcelotto/shex-ex.svg?style=flat-square)](https://travis-ci.org/marcelotto/shex-ex)
