@@ -16,8 +16,7 @@ It allows to run validations specified in the Shape Expressions language (ShEx) 
 
 The validation of larger amounts of nodes is done in parallel.
 
-For more about ShEx.ex and it's related projects, go to <https://rdf-elixir.dev>.
-
+The API documentation can be found [here](https://hexdocs.pm/shex/). For a guide and more information about ShEx.ex and it's related projects, go to <https://rdf-elixir.dev>.
 
 
 ## Limitations
@@ -28,7 +27,7 @@ For more about ShEx.ex and it's related projects, go to <https://rdf-elixir.dev>
     - external shapes
     - annotations
     - semantic actions
-- only the [datatypes supported by RDF.ex](https://rdf-elixir.dev/rdf-ex/literals.html#typed-literals) are supported in datatype and numeric facet constraints (more supported datatypes are the next planned feature for RDF.ex)
+- only the [currently datatypes supported by RDF.ex](https://rdf-elixir.dev/rdf-ex/literals.html#typed-literals) are supported in datatype and numeric facet constraints
 - greedy
 - non-ascii characters in regular expressions are not fully supported yet
 
