@@ -7,10 +7,14 @@ defmodule ShEx.Schema do
   """
 
   defstruct [
-    :shapes,     # [shapeExpr+]?
-    :start,      # shapeExpr?
-    :imports,    # [IRI+]?
-    :start_acts  # [SemAct+]?
+    # [shapeExpr+]?
+    :shapes,
+    # shapeExpr?
+    :start,
+    # [IRI+]?
+    :imports,
+    # [SemAct+]?
+    :start_acts
   ]
 
   alias ShEx.{ShapeMap, ShapeExpression}
@@ -20,8 +24,8 @@ defmodule ShEx.Schema do
   @flow_opts MapSet.new(~w[max_demand min_demand stages window buffer_keep buffer_size]a)
 
   @doc !"""
-  Creates a `ShEx.Schema`.
-  """
+       Creates a `ShEx.Schema`.
+       """
   def new(shapes, start \\ nil, imports \\ nil, start_acts \\ nil) do
     %ShEx.Schema{
       shapes: shapes |> List.wrap() |> Map.new(fn shape -> {shape.id, shape} end),
@@ -51,6 +55,7 @@ defmodule ShEx.Schema do
 
   def validate(schema, data, %ShapeMap{type: :fixed} = shape_map, opts) do
     start = start_shape_expr(schema)
+
     state = %{
       ref_stack: [],
       labeled_triple_expressions: labeled_triple_expressions([schema])
@@ -61,22 +66,24 @@ defmodule ShEx.Schema do
       |> ShapeMap.associations()
       |> Flow.from_enumerable(par_opts)
       |> Flow.map(fn association ->
-           schema
-           |> shape_expr(association.shape, start)
-           |> ShapeExpression.satisfies(data, schema, association, state)
+        schema
+        |> shape_expr(association.shape, start)
+        |> ShapeExpression.satisfies(data, schema, association, state)
       end)
       |> Enum.reduce(%ShapeMap{type: :result}, fn association, shape_map ->
-           ShapeMap.add(shape_map, association)
-         end)
+        ShapeMap.add(shape_map, association)
+      end)
     else
       shape_map
       |> ShapeMap.associations()
       |> Enum.reduce(%ShapeMap{type: :result}, fn association, result_shape_map ->
-           shape = shape_expr(schema, association.shape, start)
-           ShapeMap.add(result_shape_map,
-             ShapeExpression.satisfies(shape, data, schema, association, state)
-           )
-         end)
+        shape = shape_expr(schema, association.shape, start)
+
+        ShapeMap.add(
+          result_shape_map,
+          ShapeExpression.satisfies(shape, data, schema, association, state)
+        )
+      end)
     end
   end
 
@@ -106,14 +113,14 @@ defmodule ShEx.Schema do
         if schema.shapes[id] do
           :ok
         else
-          {:error, "couldn't resolve shape expression reference #{inspect id}"}
+          {:error, "couldn't resolve shape expression reference #{inspect(id)}"}
         end
 
       {:triple_expression_label, id} ->
         if labeled_triple_expressions[id] do
           :ok
         else
-          {:error, "couldn't resolve triple expression reference #{inspect id}"}
+          {:error, "couldn't resolve triple expression reference #{inspect(id)}"}
         end
 
       operator ->
@@ -121,7 +128,8 @@ defmodule ShEx.Schema do
           if is_nil(schema.shapes[operator.id]) do
             :ok
           else
-            {:error, "#{inspect operator.id} can't be a shape expression label and a triple expression label"}
+            {:error,
+             "#{inspect(operator.id)} can't be a shape expression label and a triple expression label"}
           end
         else
           :ok
@@ -166,7 +174,6 @@ defmodule ShEx.Schema do
 
   defp shape_expr(_, :start, start_expr), do: start_expr
   defp shape_expr(schema, shape_label, _), do: shape_expr_with_id(schema, shape_label)
-
 
   defimpl ShEx.Operator do
     def children(schema) do

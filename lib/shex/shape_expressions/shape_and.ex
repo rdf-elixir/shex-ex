@@ -2,8 +2,10 @@ defmodule ShEx.ShapeAnd do
   @moduledoc false
 
   defstruct [
-    :id,          # shapeExprLabel?
-    :shape_exprs  # [shapeExpr{2,}]
+    # shapeExprLabel?
+    :id,
+    # [shapeExpr{2,}]
+    :shape_exprs
   ]
 
   defimpl ShEx.ShapeExpression do

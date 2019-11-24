@@ -7,6 +7,7 @@ defmodule ShEx.NodeConstraint.StringFacets do
 
   def new(xs_facets) do
     string_facets = struct(__MODULE__, xs_facets)
+
     if %__MODULE__{} != string_facets do
       string_facets
     end
@@ -20,11 +21,11 @@ defmodule ShEx.NodeConstraint.StringFacets do
   def satisfies(string_facets, node) do
     lex = lexical_form(node)
     len = String.length(lex)
+
     with true <- satisfies_string_length(string_facets.length, len),
          true <- satisfies_string_minlength(string_facets.minlength, len),
          true <- satisfies_string_maxlength(string_facets.maxlength, len),
-         true <- satisfies_string_pattern(string_facets, lex)
-    do
+         true <- satisfies_string_pattern(string_facets, lex) do
       :ok
     else
       {:violates, type, value} ->
@@ -37,21 +38,25 @@ defmodule ShEx.NodeConstraint.StringFacets do
   end
 
   defp satisfies_string_length(nil, _), do: true
+
   defp satisfies_string_length(length, len) do
     length == len || {:violates, :length, length}
   end
 
   defp satisfies_string_minlength(nil, _), do: true
+
   defp satisfies_string_minlength(minlength, len) do
     minlength <= len || {:violates, :minlength, minlength}
   end
 
   defp satisfies_string_maxlength(nil, _), do: true
+
   defp satisfies_string_maxlength(maxlength, len) do
     maxlength >= len || {:violates, :maxlength, maxlength}
   end
 
   defp satisfies_string_pattern(%{pattern: nil}, _), do: true
+
   defp satisfies_string_pattern(%{pattern: pattern, flags: flags} = pattern_facet, lex) do
     RDF.Literal.matches?(lex, pattern, flags || "") ||
       {:violates, :pattern, pattern_facet}
@@ -60,5 +65,5 @@ defmodule ShEx.NodeConstraint.StringFacets do
   defp lexical_form(%IRI{value: value}), do: value
   defp lexical_form(%BlankNode{id: id}), do: id
   defp lexical_form(%Literal{} = literal), do: Literal.lexical(literal)
-  defp lexical_form(value), do: raise "Invalid node value: #{inspect value}}"
+  defp lexical_form(value), do: raise("Invalid node value: #{inspect(value)}}")
 end

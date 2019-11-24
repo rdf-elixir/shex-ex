@@ -3,7 +3,7 @@ defmodule ShEx.MixProject do
 
   @repo_url "https://github.com/marcelotto/shex-ex"
 
-  @version File.read!("VERSION") |> String.trim
+  @version File.read!("VERSION") |> String.trim()
 
   def project do
     [
@@ -24,7 +24,7 @@ defmodule ShEx.MixProject do
         main: "ShEx",
         source_url: @repo_url,
         source_ref: "v#{@version}",
-        extras: ["CHANGELOG.md"],
+        extras: ["CHANGELOG.md"]
       ]
     ]
   end
@@ -42,7 +42,7 @@ defmodule ShEx.MixProject do
       links: %{
         "Homepage" => "https://rdf-elixir.dev",
         "GitHub" => @repo_url,
-        "Changelog" => @repo_url <> "/blob/master/CHANGELOG.md",
+        "Changelog" => @repo_url <> "/blob/master/CHANGELOG.md"
       },
       files: ~w[lib src/*.xrl src/*.yrl mix.exs VERSION *.md]
     ]
@@ -61,11 +61,11 @@ defmodule ShEx.MixProject do
       {:jason, "~> 1.1"},
 
       # Development
-      {:credo, "~> 1.1",   only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
     ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 end

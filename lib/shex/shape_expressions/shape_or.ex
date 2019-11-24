@@ -2,29 +2,32 @@ defmodule ShEx.ShapeOr do
   @moduledoc false
 
   defstruct [
-    :id,          # shapeExprLabel?
-    :shape_exprs  # [shapeExpr{2,}]
+    # shapeExprLabel?
+    :id,
+    # [shapeExpr{2,}]
+    :shape_exprs
   ]
 
   defimpl ShEx.ShapeExpression do
     def satisfies(shape_or, graph, schema, association, state) do
       shape_or.shape_exprs
       |> Enum.reduce_while({[], []}, fn expression, {reasons, app_infos} ->
-           ShEx.ShapeExpression.satisfies(expression, graph, schema, association, state)
-           |> case do
-                %{status: :conformant} ->
-                  {:halt, :ok}
-                %{reason: reason, app_info: app_info} ->
-                  {:cont, {reasons ++ List.wrap(reason), [app_info | app_infos]}}
-              end
-         end)
-      |> case do
-           :ok ->
-             ShEx.ShapeMap.Association.conform(association)
+        ShEx.ShapeExpression.satisfies(expression, graph, schema, association, state)
+        |> case do
+          %{status: :conformant} ->
+            {:halt, :ok}
 
-           {reasons, app_infos} ->
-             ShEx.ShapeMap.Association.violation(association, reasons, app_infos)
-         end
+          %{reason: reason, app_info: app_info} ->
+            {:cont, {reasons ++ List.wrap(reason), [app_info | app_infos]}}
+        end
+      end)
+      |> case do
+        :ok ->
+          ShEx.ShapeMap.Association.conform(association)
+
+        {reasons, app_infos} ->
+          ShEx.ShapeMap.Association.violation(association, reasons, app_infos)
+      end
     end
   end
 

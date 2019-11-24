@@ -52,7 +52,7 @@ defmodule ShEx.Violation.NodeKindConstraint do
     def label(_), do: "Node Kind Constraint Violation"
 
     def reason(violation) do
-      "#{inspect violation.node} is not a #{violation.node_kind}"
+      "#{inspect(violation.node)} is not a #{violation.node_kind}"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -70,7 +70,7 @@ defmodule ShEx.Violation.DatatypeConstraint do
     def label(_), do: "Datatype Constraint Violation"
 
     def reason(violation) do
-      "#{inspect violation.node} has not datatype #{inspect violation.datatype}"
+      "#{inspect(violation.node)} has not datatype #{inspect(violation.datatype)}"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -88,23 +88,25 @@ defmodule ShEx.Violation.StringFacetConstraint do
     def label(_), do: "String Facet Constraint Violation"
 
     def reason(%{facet_type: :length} = violation) do
-      "length of #{inspect violation.node} is not #{violation.facet_value}"
+      "length of #{inspect(violation.node)} is not #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :minlength} = violation) do
-      "length of #{inspect violation.node} is less than #{violation.facet_value}"
+      "length of #{inspect(violation.node)} is less than #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :maxlength} = violation) do
-      "length of #{inspect violation.node} is greater than #{violation.facet_value}"
+      "length of #{inspect(violation.node)} is greater than #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :pattern, facet_value: %{flags: nil}} = violation) do
-      "#{inspect violation.node} does not match pattern #{inspect violation.facet_value.pattern}"
+      "#{inspect(violation.node)} does not match pattern #{inspect(violation.facet_value.pattern)}"
     end
 
     def reason(%{facet_type: :pattern} = violation) do
-      "#{inspect violation.node} does not match pattern #{inspect violation.facet_value.pattern} with flags #{inspect violation.facet_value.flags}"
+      "#{inspect(violation.node)} does not match pattern #{inspect(violation.facet_value.pattern)} with flags #{
+        inspect(violation.facet_value.flags)
+      }"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -122,31 +124,33 @@ defmodule ShEx.Violation.NumericFacetConstraint do
     def label(_), do: "Numeric Facet Constraint Violation"
 
     def reason(%{facet_type: :invalid_numeric} = violation) do
-      "#{inspect violation.node} is not numeric"
+      "#{inspect(violation.node)} is not numeric"
     end
 
     def reason(%{facet_type: :mininclusive} = violation) do
-      "#{inspect violation.node} is less than #{violation.facet_value}"
+      "#{inspect(violation.node)} is less than #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :minexclusive} = violation) do
-      "#{inspect violation.node} is less than or equal to #{violation.facet_value}"
+      "#{inspect(violation.node)} is less than or equal to #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :maxinclusive} = violation) do
-      "#{inspect violation.node} is greater than #{violation.facet_value}"
+      "#{inspect(violation.node)} is greater than #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :maxexclusive} = violation) do
-      "#{inspect violation.node} is greater than or equal to #{violation.facet_value}"
+      "#{inspect(violation.node)} is greater than or equal to #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :totaldigits} = violation) do
-      "number of digits of #{inspect violation.node} is greater than #{violation.facet_value}"
+      "number of digits of #{inspect(violation.node)} is greater than #{violation.facet_value}"
     end
 
     def reason(%{facet_type: :fractiondigits} = violation) do
-      "number of fractional digits of #{inspect violation.node} is greater than #{violation.facet_value}"
+      "number of fractional digits of #{inspect(violation.node)} is greater than #{
+        violation.facet_value
+      }"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -164,24 +168,24 @@ defmodule ShEx.Violation.ValuesConstraint do
     def label(_), do: "Values Constraint Violation"
 
     def reason(%{constraint_type: :object_value} = violation) do
-      "#{inspect violation.node} is not #{inspect violation.constraint_value}"
+      "#{inspect(violation.node)} is not #{inspect(violation.constraint_value)}"
     end
 
     def reason(%{constraint_type: :language, constraint_value: ""} = violation) do
-      "#{inspect violation.node} is not language-tagged"
+      "#{inspect(violation.node)} is not language-tagged"
     end
 
     def reason(%{constraint_type: :language} = violation) do
-      "language of #{inspect violation.node} is not #{inspect violation.constraint_value}"
+      "language of #{inspect(violation.node)} is not #{inspect(violation.constraint_value)}"
     end
 
     def reason(%{constraint_type: type} = violation)
         when type in ~w[IriStem LiteralStem LanguageStem IriStemRange LiteralStemRange LanguageStemRange] do
-      "#{type} of #{inspect violation.node} is not #{inspect violation.constraint_value}"
+      "#{type} of #{inspect(violation.node)} is not #{inspect(violation.constraint_value)}"
     end
 
     def reason(%{constraint_type: :exclusion} = violation) do
-      "#{inspect violation.node} is an excluded value"
+      "#{inspect(violation.node)} is an excluded value"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -209,8 +213,11 @@ defmodule ShEx.Violation.MinCardinality do
       triple_expression_violation_reasons =
         triple_expression_violation_reasons(violation.triple_expression_violations)
 
-      if skip_triple_expression?(violation.triple_expression, violation.cardinality,
-           triple_expression_violation_reasons) do
+      if skip_triple_expression?(
+           violation.triple_expression,
+           violation.cardinality,
+           triple_expression_violation_reasons
+         ) do
         triple_expression_violation_reasons
       else
         main_reason(violation)
@@ -224,28 +231,27 @@ defmodule ShEx.Violation.MinCardinality do
       } #{triple_expression_label(violation.triple_expression)}"
     end
 
-    defp cardinality(0),   do: "none"
+    defp cardinality(0), do: "none"
     defp cardinality(num), do: "just #{num}"
 
     defp triple_expression_label(%ShEx.TripleConstraint{} = triple_constraint) do
-      "#{if triple_constraint.inverse, do: "inverse "}#{
-        inspect triple_constraint.predicate} triples"
+      "#{if triple_constraint.inverse, do: "inverse "}#{inspect(triple_constraint.predicate)} triples"
     end
 
     defp triple_expression_label(%ShEx.EachOf{}), do: "eachOf expressions"
     defp triple_expression_label(%ShEx.OneOf{}), do: "oneOf expressions"
 
     defp triple_expression_violation_reasons(nil), do: empty()
-    defp triple_expression_violation_reasons([]),  do: empty()
+    defp triple_expression_violation_reasons([]), do: empty()
 
     defp triple_expression_violation_reasons(triple_expression_violations) do
       triple_expression_violations
       |> Enum.map(&ShEx.Violation.reason_doc/1)
       |> Enum.map(fn reason ->
-          "- "
-          |> concat(nest(group(reason), 2))
-          |> concat(collapse_lines(1))
-         end)
+        "- "
+        |> concat(nest(group(reason), 2))
+        |> concat(collapse_lines(1))
+      end)
       |> concat()
     end
 
@@ -266,14 +272,13 @@ defmodule ShEx.Violation.MaxCardinality do
     def label(_), do: "Maximum Cardinality Violation"
 
     def reason(violation) do
-      "Max cardinality (#{
-        ShEx.TripleExpression.max_cardinality(violation.triple_expression)}) of #{
-        triple_expression_label(violation.triple_expression)} exceeded"
+      "Max cardinality (#{ShEx.TripleExpression.max_cardinality(violation.triple_expression)}) of #{
+        triple_expression_label(violation.triple_expression)
+      } exceeded"
     end
 
     defp triple_expression_label(%ShEx.TripleConstraint{} = triple_constraint) do
-      "#{if triple_constraint.inverse, do: "inverse "}#{
-        inspect triple_constraint.predicate} triples"
+      "#{if triple_constraint.inverse, do: "inverse "}#{inspect(triple_constraint.predicate)} triples"
     end
 
     defp triple_expression_label(%ShEx.EachOf{}), do: "eachOf expressions"
@@ -330,7 +335,7 @@ defmodule ShEx.Violation.NegationMatch do
 
     def reason(violation) do
       # TODO: improve this
-      "negation expression #{inspect violation.shape_not} matched"
+      "negation expression #{inspect(violation.shape_not)} matched"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason

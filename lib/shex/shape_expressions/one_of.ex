@@ -2,12 +2,18 @@ defmodule ShEx.OneOf do
   @moduledoc false
 
   defstruct [
-    :id,          # tripleExprLabel?
-    :expressions, # [tripleExpr{2,}]
-    :min,         # INTEGER?
-    :max,         # INTEGER?
-    :sem_acts,    # [SemAct+]?
-    :annotations  # [Annotation+]?
+    # tripleExprLabel?
+    :id,
+    # [tripleExpr{2,}]
+    :expressions,
+    # INTEGER?
+    :min,
+    # INTEGER?
+    :max,
+    # [SemAct+]?
+    :sem_acts,
+    # [Annotation+]?
+    :annotations
   ]
 
   import ShEx.TripleExpression.Shared
@@ -16,9 +22,12 @@ defmodule ShEx.OneOf do
     with {matched, remainder, match_count, violations} <-
            find_matches(triples, one_of, graph, schema, association, state),
          :ok <-
-           check_cardinality(match_count,
-             ShEx.TripleExpression.min_cardinality(one_of), one_of, violations)
-    do
+           check_cardinality(
+             match_count,
+             ShEx.TripleExpression.min_cardinality(one_of),
+             one_of,
+             violations
+           ) do
       {:ok, matched, remainder}
     else
       violation ->
@@ -27,34 +36,45 @@ defmodule ShEx.OneOf do
   end
 
   defp find_matches(triples, one_of, graph, schema, association, state) do
-    do_find_matches({:ok, [], triples, 0, []},
-      one_of.expressions, ShEx.TripleExpression.max_cardinality(one_of),
-      graph, schema, association, state)
+    do_find_matches(
+      {:ok, [], triples, 0, []},
+      one_of.expressions,
+      ShEx.TripleExpression.max_cardinality(one_of),
+      graph,
+      schema,
+      association,
+      state
+    )
   end
 
   defp do_find_matches({:ok, matched, remainder, max, violations}, _, max, _, _, _, _),
     do: {matched, remainder, max, violations}
 
-  defp do_find_matches({:ok, matched, remainder, match_count, violations},
-         expressions, max, graph, schema, association, state) do
+  defp do_find_matches(
+         {:ok, matched, remainder, match_count, violations},
+         expressions,
+         max,
+         graph,
+         schema,
+         association,
+         state
+       ) do
     expressions
     |> Enum.reduce_while({matched, remainder, match_count, violations}, fn
-        expression, {matched, remainder, match_count, violations} ->
-          ShEx.TripleExpression.matches(
-            expression, remainder, graph, schema, association, state)
-          |> case do
-               {:ok, new_matched, new_remainder} ->
-                 {:halt, {:ok, new_matched, new_remainder, match_count + 1, violations}}
+      expression, {matched, remainder, match_count, violations} ->
+        ShEx.TripleExpression.matches(expression, remainder, graph, schema, association, state)
+        |> case do
+          {:ok, new_matched, new_remainder} ->
+            {:halt, {:ok, new_matched, new_remainder, match_count + 1, violations}}
 
-               {:error, violation} ->
-                 {:cont, {matched, remainder, match_count, violations ++ List.wrap(violation)}}
-             end
-        end)
+          {:error, violation} ->
+            {:cont, {matched, remainder, match_count, violations ++ List.wrap(violation)}}
+        end
+    end)
     |> do_find_matches(expressions, max, graph, schema, association, state)
   end
 
   defp do_find_matches(acc, _, _, _, _, _, _), do: acc
-
 
   defimpl ShEx.TripleExpression do
     def matches(one_of, triples, graph, schema, association, state) do

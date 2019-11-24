@@ -2,44 +2,44 @@ defmodule ShEx.Shape do
   @moduledoc false
 
   defstruct [
-    :id,          # shapeExprLabel?
-    :expression,  # tripleExpr?
-    :closed,      # BOOL?
-    :extra,       # [IRI]?
-    :sem_acts,    # [SemAct]?
-    :annotations  # [Annotation+]?
+    # shapeExprLabel?
+    :id,
+    # tripleExpr?
+    :expression,
+    # BOOL?
+    :closed,
+    # [IRI]?
+    :extra,
+    # [SemAct]?
+    :sem_acts,
+    # [Annotation+]?
+    :annotations
   ]
 
   import ShEx.GraphUtils
 
-
   def satisfies(shape, graph, schema, association, state) do
     node = association.node
     arcs_out = arcs_out(graph, node)
+    # Since the search for arcs_in is computationally very expensive with RDF.ex
+    # having currently no index on the triple objects, we do this only when
+    # necessary, i.e. when inverse triple expressions exist.
     arcs_in =
-      # Since the search for arcs_in computationally very expensive with RDF.ex
-      # having currently no index on the triple objects, we do this only when
-      # necessary, i.e. when inverse triple expressions exist.
       unless shape.expression &&
                ShEx.TripleExpression.required_arcs(shape.expression, state) == {:arcs_out} do
         arcs_in(graph, node)
       end
 
     with {:ok, _matched, {_, outs}} <-
-            matches(shape.expression, {arcs_in, arcs_out}, graph, schema, association, state),
-
+           matches(shape.expression, {arcs_in, arcs_out}, graph, schema, association, state),
          {matchables, unmatchables} <-
            matchables(shape.expression, outs, state),
-
          :ok <-
            check_unmatched(shape.expression, matchables, graph, schema, association, state),
-
          :ok <-
            check_extra(List.wrap(shape.extra), matchables, shape.expression),
-
          :ok <-
-           check_closed(shape.closed, unmatchables, shape)
-    do
+           check_closed(shape.closed, unmatchables, shape) do
       ShEx.ShapeMap.Association.conform(association)
     else
       {:error, violation} ->
@@ -52,13 +52,13 @@ defmodule ShEx.Shape do
   end
 
   defp matches(triple_constraint, triples, graph, schema, association, state) do
-    ShEx.TripleExpression.matches(
-        triple_constraint, triples, graph, schema, association, state)
+    ShEx.TripleExpression.matches(triple_constraint, triples, graph, schema, association, state)
   end
 
   # Let `matchables` be the triples in `outs` whose predicate appears in a `TripleConstraint` in `expression`. If `expression` is absent, `matchables = Ø` (the empty set).
   # Let `unmatchables` be the triples in `outs` which are not in `matchables`.
   defp matchables(nil, outs, _), do: {[], outs}
+
   defp matchables(triple_constraint, outs, state) do
     predicates = ShEx.TripleExpression.predicates(triple_constraint, state)
     Enum.split_with(outs, fn {_, predicate, _} -> predicate in predicates end)
@@ -66,11 +66,11 @@ defmodule ShEx.Shape do
 
   # No matchable can be matched by any TripleConstraint in expression
   defp check_unmatched(nil, _, _, _, _, _), do: :ok
+
   defp check_unmatched(triple_constraint, matchables, graph, schema, association, state) do
     if triple_constraint
        |> matching_unmatched(matchables, graph, schema, association, state)
-       |> Enum.empty?()
-    do
+       |> Enum.empty?() do
       :ok
     else
       {:error, %ShEx.Violation.MaxCardinality{triple_expression: triple_constraint}}
@@ -81,13 +81,16 @@ defmodule ShEx.Shape do
     triple_constraints =
       triple_constraint
       |> ShEx.TripleExpression.triple_constraints(state)
-        # We'll reset the cardinality here, because one match is sufficient ...
+      # We'll reset the cardinality here, because one match is sufficient ...
       |> Enum.map(fn expression -> expression |> Map.put(:min, nil) |> Map.put(:max, nil) end)
+
     Enum.filter(matchables, fn {_, predicate, _} = statement ->
       Enum.any?(triple_constraints, fn triple_constraint ->
         triple_constraint.predicate == predicate and
-          match?({:ok, _, _},
-            matches(triple_constraint, {[], [statement]}, graph, schema, association, state))
+          match?(
+            {:ok, _, _},
+            matches(triple_constraint, {[], [statement]}, graph, schema, association, state)
+          )
       end)
     end)
   end
@@ -110,7 +113,6 @@ defmodule ShEx.Shape do
     end
   end
 
-
   defimpl ShEx.ShapeExpression do
     def satisfies(shape, graph, schema, association, state) do
       ShEx.Shape.satisfies(shape, graph, schema, association, state)
@@ -126,8 +128,8 @@ defmodule ShEx.Shape do
         RDF.term?(shape.expression) ->
           [{:triple_expression_label, shape.expression}]
 
-       true ->
-        [shape.expression]
+        true ->
+          [shape.expression]
       end
     end
 

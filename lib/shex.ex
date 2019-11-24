@@ -23,6 +23,6 @@ defmodule ShEx do
     validate(data, schema, shape_map(shape_map), opts)
   end
 
-  defdelegate shape_map(),        to: ShapeMap, as: :new
+  defdelegate shape_map(), to: ShapeMap, as: :new
   defdelegate shape_map(mapping), to: ShapeMap, as: :new
 end

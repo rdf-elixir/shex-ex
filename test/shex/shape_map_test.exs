@@ -9,9 +9,9 @@ defmodule ShEx.ShapeMapTest do
   use RDF.Vocabulary.Namespace
 
   defvocab EX,
-           base_iri: "http://example.org/#",
-           terms: [], strict: false
-
+    base_iri: "http://example.org/#",
+    terms: [],
+    strict: false
 
   @iri ~I<http://example.org/#foo>
   @bnode ~B<foo>
@@ -22,33 +22,52 @@ defmodule ShEx.ShapeMapTest do
   @nonconformant_association ShapeMap.Association.new(@literal, @shape_label)
                              |> ShapeMap.Association.violation("error")
   @conformant_fixed_shape_map ShapeMap.new([@conformant_association])
-  @nonconformant_fixed_shape_map ShapeMap.new([@conformant_association, @nonconformant_association])
+  @nonconformant_fixed_shape_map ShapeMap.new([
+                                   @conformant_association,
+                                   @nonconformant_association
+                                 ])
 
   describe "new/1" do
     test "when given a map of node-shape identifier pairs" do
       assert ShapeMap.new(%{@iri => @shape_label}) ==
-               %ShapeMap{type: :fixed, conformant: [%ShapeMap.Association{node: @iri, shape: @shape_label}]}
+               %ShapeMap{
+                 type: :fixed,
+                 conformant: [%ShapeMap.Association{node: @iri, shape: @shape_label}]
+               }
+
       assert ShapeMap.new(%{@bnode => @shape_label}) ==
-               %ShapeMap{type: :fixed, conformant: [%ShapeMap.Association{node: @bnode, shape: @shape_label}]}
+               %ShapeMap{
+                 type: :fixed,
+                 conformant: [%ShapeMap.Association{node: @bnode, shape: @shape_label}]
+               }
+
       assert ShapeMap.new(%{@literal => @shape_label}) ==
-               %ShapeMap{type: :fixed, conformant: [%ShapeMap.Association{node: @literal, shape: @shape_label}]}
+               %ShapeMap{
+                 type: :fixed,
+                 conformant: [%ShapeMap.Association{node: @literal, shape: @shape_label}]
+               }
 
       assert ShapeMap.new(%{
                @iri => @shape_label,
                @bnode => @shape_label,
                @literal => @shape_label
-             }) == %ShapeMap{type: :fixed, conformant: [
-               %ShapeMap.Association{node: @literal, shape: @shape_label},
-               %ShapeMap.Association{node: @iri, shape: @shape_label},
-               %ShapeMap.Association{node: @bnode, shape: @shape_label},
-             ]}
+             }) == %ShapeMap{
+               type: :fixed,
+               conformant: [
+                 %ShapeMap.Association{node: @literal, shape: @shape_label},
+                 %ShapeMap.Association{node: @iri, shape: @shape_label},
+                 %ShapeMap.Association{node: @bnode, shape: @shape_label}
+               ]
+             }
     end
 
     test "when given a map of node-shape identifier pairs consisting of vocabulary atoms" do
       assert ShapeMap.new(%{EX.Foo => EX.Shape}) ==
                %ShapeMap{
                  type: :fixed,
-                 conformant: [%ShapeMap.Association{node: ~I<http://example.org/#Foo>, shape: @shape_label}]
+                 conformant: [
+                   %ShapeMap.Association{node: ~I<http://example.org/#Foo>, shape: @shape_label}
+                 ]
                }
     end
 
@@ -66,7 +85,7 @@ defmodule ShEx.ShapeMapTest do
     end
 
     test "when given a map with triple patterns consisting of vocabulary atoms" do
-      assert ShapeMap.new(%{{EX.Bar, EX.foo, :focus} => EX.Shape}) ==
+      assert ShapeMap.new(%{{EX.Bar, EX.foo(), :focus} => EX.Shape}) ==
                %ShapeMap{
                  type: :query,
                  conformant: [
@@ -149,67 +168,66 @@ defmodule ShEx.ShapeMapTest do
 
   describe "to_fixed/1" do
     @graph RDF.Turtle.Decoder.decode!("""
-      <http://example.org/#S1> <http://example.org/#p1> <http://example.org/#O1> .
-      <http://example.org/#S1> <http://example.org/#p2> <http://example.org/#O2> .
-      <http://example.org/#S1> <http://example.org/#p1> _:blank .
-      """)
+           <http://example.org/#S1> <http://example.org/#p1> <http://example.org/#O1> .
+           <http://example.org/#S1> <http://example.org/#p2> <http://example.org/#O2> .
+           <http://example.org/#S1> <http://example.org/#p1> _:blank .
+           """)
 
     test "focus on subject" do
       assert ShapeMap.new(%{
-               {:focus, ~I<http://example.org/#p1>, ~I<http://example.org/#O1>} => @shape_label}
-             ) |> ShapeMap.to_fixed(@graph) ==
+               {:focus, ~I<http://example.org/#p1>, ~I<http://example.org/#O1>} => @shape_label
+             })
+             |> ShapeMap.to_fixed(@graph) ==
                {:ok, ShapeMap.new(%{~I<http://example.org/#S1> => @shape_label})}
 
-      assert ShapeMap.new(%{{:focus, EX.p1, EX.O1} => @shape_label})
+      assert ShapeMap.new(%{{:focus, EX.p1(), EX.O1} => @shape_label})
              |> ShapeMap.to_fixed(@graph) ==
                {:ok, ShapeMap.new(%{~I<http://example.org/#S1> => @shape_label})}
     end
 
     test "focus on object" do
       assert ShapeMap.new(%{
-               {~I<http://example.org/#S1>, ~I<http://example.org/#p1>, :focus} => @shape_label}
-             ) |> ShapeMap.to_fixed(@graph) ==
-               {:ok, ShapeMap.new(%{
-                 ~I<http://example.org/#O1> => @shape_label,
-                 ~B<blank> => @shape_label
-               })}
+               {~I<http://example.org/#S1>, ~I<http://example.org/#p1>, :focus} => @shape_label
+             })
+             |> ShapeMap.to_fixed(@graph) ==
+               {:ok,
+                ShapeMap.new(%{
+                  ~I<http://example.org/#O1> => @shape_label,
+                  ~B<blank> => @shape_label
+                })}
     end
 
     test "focus on subject and wildcard object" do
-      assert ShapeMap.new(%{{:focus, EX.p1, :_} => @shape_label})
+      assert ShapeMap.new(%{{:focus, EX.p1(), :_} => @shape_label})
              |> ShapeMap.to_fixed(@graph) ==
                {:ok, ShapeMap.new(%{~I<http://example.org/#S1> => @shape_label})}
     end
 
     test "focus on object and wildcard subject" do
-      assert ShapeMap.new(%{
-               {:_, ~I<http://example.org/#p1>, :focus} => @shape_label}
-             ) |> ShapeMap.to_fixed(@graph) ==
-               {:ok, ShapeMap.new(%{
-                 ~I<http://example.org/#O1> => @shape_label,
-                 ~B<blank> => @shape_label
-               })}
+      assert ShapeMap.new(%{{:_, ~I<http://example.org/#p1>, :focus} => @shape_label})
+             |> ShapeMap.to_fixed(@graph) ==
+               {:ok,
+                ShapeMap.new(%{
+                  ~I<http://example.org/#O1> => @shape_label,
+                  ~B<blank> => @shape_label
+                })}
     end
 
     test "without results" do
-      assert ShapeMap.new(%{
-               {:_, ~I<http://example.org/#p4>, :focus} => @shape_label}
-             ) |> ShapeMap.to_fixed(@graph) ==
+      assert ShapeMap.new(%{{:_, ~I<http://example.org/#p4>, :focus} => @shape_label})
+             |> ShapeMap.to_fixed(@graph) ==
                {:ok, ShapeMap.new()}
-
     end
 
     test "if the same shape association is imputed multiple times, it appears in the fixed ShapeMap only once" do
-      assert ShapeMap.new(%{
-               {:_, EX.p2, :focus} => @shape_label}
-             ) |> ShapeMap.to_fixed(@graph) ==
+      assert ShapeMap.new(%{{:_, EX.p2(), :focus} => @shape_label}) |> ShapeMap.to_fixed(@graph) ==
                {:ok, ShapeMap.new(%{~I<http://example.org/#O2> => @shape_label})}
     end
   end
 
   describe "Enumerable protocol" do
     test "Enum.count" do
-      assert Enum.empty?(ShapeMap.new)
+      assert Enum.empty?(ShapeMap.new())
       assert Enum.count(@conformant_fixed_shape_map) == 1
       assert Enum.count(@nonconformant_fixed_shape_map) == 2
     end
@@ -221,7 +239,7 @@ defmodule ShEx.ShapeMapTest do
     end
 
     test "Enum.reduce" do
-      assert Enum.reduce(@nonconformant_fixed_shape_map, [], fn (association, acc) ->
+      assert Enum.reduce(@nonconformant_fixed_shape_map, [], fn association, acc ->
                [association | acc]
              end) == [@nonconformant_association, @conformant_association]
     end

@@ -46,6 +46,7 @@ defmodule ShEx.ShExC.Decoder do
   defp build_schema({:shex_doc, directives_ast, start_acts_ast, statements_ast}, base) do
     state = %State{base_iri: base}
     all_statements = directives_ast ++ statements_ast
+
     with {:ok, statements, imports} <-
            extract_imports(all_statements, state),
          {:ok, statements, start} <-
@@ -73,41 +74,41 @@ defmodule ShEx.ShExC.Decoder do
 
   defp extract_prefixes(statements_ast, state) do
     {statements, _, state} =
-      Enum.reduce(statements_ast, {[], :consume_directives, state}, &(handle_base_and_prefixes/2))
+      Enum.reduce(statements_ast, {[], :consume_directives, state}, &handle_base_and_prefixes/2)
 
     {:ok, statements, state}
   end
 
-  defp handle_base_and_prefixes({:prefix, {:prefix_ns, _, ns}, iri} = directive, {statements, value, state}) do
+  defp handle_base_and_prefixes(
+         {:prefix, {:prefix_ns, _, ns}, iri} = directive,
+         {statements, value, state}
+       ) do
     {
       if value == :consume_directives do
         statements
       else
         statements ++ [directive]
       end,
-
       value,
-
       if IRI.absolute?(iri) do
         State.add_namespace(state, ns, iri)
       else
-        State.add_namespace(state, ns,
-          iri |> IRI.absolute(state.base_iri) |> to_string())
+        State.add_namespace(state, ns, iri |> IRI.absolute(state.base_iri) |> to_string())
       end
     }
   end
 
-  defp handle_base_and_prefixes({:base, iri} = directive,
-        {statements, value, %State{base_iri: base_iri} = state}) do
+  defp handle_base_and_prefixes(
+         {:base, iri} = directive,
+         {statements, value, %State{base_iri: base_iri} = state}
+       ) do
     {
       if value == :consume_directives do
         statements
       else
         statements ++ [directive]
       end,
-
       value,
-
       cond do
         IRI.absolute?(iri) ->
           %State{state | base_iri: RDF.iri(iri)}
@@ -152,7 +153,7 @@ defmodule ShEx.ShExC.Decoder do
              {:start, inline_shape_expression}, {statements, nil, state} ->
                case build_shape_expression(inline_shape_expression, state) do
                  {:ok, shape} -> {:cont, {statements, shape, state}}
-                 error        -> {:halt, error}
+                 error -> {:halt, error}
                end
 
              {:start, _inline_shape_expression}, {_statements, _start, _state} ->
@@ -436,17 +437,23 @@ defmodule ShEx.ShExC.Decoder do
     xs_facets_ast
     |> List.wrap()
     |> Enum.reduce_while({:ok, %{}}, fn xs_facet_ast, {:ok, xs_facets} ->
-         case xs_facet(xs_facet_ast, state) do
-           {:ok, xs_facet} ->
-             conflicts = Map.take(xs_facets, Map.keys(xs_facet))
-             if conflicts == %{} do
-               {:cont, {:ok, Map.merge(xs_facets, xs_facet)}}
-             else
-               {:halt, {:error, "multiple occurrences of the same xsFacet: #{conflicts |> Map.keys |> Enum.join(", ")}}"}}
-             end
-           {:error, _} = error ->
-             {:halt, error}
-         end
+      case xs_facet(xs_facet_ast, state) do
+        {:ok, xs_facet} ->
+          conflicts = Map.take(xs_facets, Map.keys(xs_facet))
+
+          if conflicts == %{} do
+            {:cont, {:ok, Map.merge(xs_facets, xs_facet)}}
+          else
+            {:halt,
+             {:error,
+              "multiple occurrences of the same xsFacet: #{
+                conflicts |> Map.keys() |> Enum.join(", ")
+              }}"}}
+          end
+
+        {:error, _} = error ->
+          {:halt, error}
+      end
     end)
   end
 
@@ -481,7 +488,8 @@ defmodule ShEx.ShExC.Decoder do
     if RDF.Numeric.type?(datatype) do
       {:ok, numeric_facets}
     else
-      {:error, "numeric facet constraints applied to non-numeric datatype: #{to_string datatype}}"}
+      {:error,
+       "numeric facet constraints applied to non-numeric datatype: #{to_string(datatype)}}"}
     end
   end
 
@@ -597,7 +605,7 @@ defmodule ShEx.ShExC.Decoder do
   defp build_node(%BlankNode{} = bnode, _state), do: {:ok, bnode}
   defp build_node(%Literal{} = literal, _state), do: {:ok, literal}
 
-  defp build_node(:rdf_type, _state), do: {:ok, RDF.type}
+  defp build_node(:rdf_type, _state), do: {:ok, RDF.type()}
 
   defp build_node({:prefix_ln, line, {prefix, name}}, state) do
     if ns = State.ns(state, prefix) do
@@ -637,6 +645,7 @@ defmodule ShEx.ShExC.Decoder do
   defp unescape_code(string), do: Macro.unescape_string(string)
 
   defp unescape_regex(nil), do: nil
+
   defp unescape_regex(string),
     do: string |> unescape_8digit_unicode_seq() |> Macro.unescape_string(&regex_unescape_map(&1))
 
@@ -645,6 +654,10 @@ defmodule ShEx.ShExC.Decoder do
   defp regex_unescape_map(_), do: false
 
   defp unescape_8digit_unicode_seq(string) do
-    String.replace(string, ~r/(?<!\\)\\U([0-9]|[A-F]|[a-f]){2}(([0-9]|[A-F]|[a-f]){6})/, "\\u{\\2}")
+    String.replace(
+      string,
+      ~r/(?<!\\)\\U([0-9]|[A-F]|[a-f]){2}(([0-9]|[A-F]|[a-f]){6})/,
+      "\\u{\\2}"
+    )
   end
 end

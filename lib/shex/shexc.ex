@@ -26,7 +26,7 @@ defmodule ShEx.ShExC do
   """
   def decode!(content, opts \\ []) do
     case decode(content, opts) do
-      {:ok, schema}   -> schema
+      {:ok, schema} -> schema
       {:error, error} -> raise error
     end
   end

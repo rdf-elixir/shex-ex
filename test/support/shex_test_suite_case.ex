@@ -3,7 +3,7 @@ defmodule ShEx.TestSuite.Case do
 
   using do
     quote do
-      ExUnit.Case.register_attribute __ENV__, :test_case
+      ExUnit.Case.register_attribute(__ENV__, :test_case)
 
       alias ShEx.TestSuite
       alias TestSuite.NS.{MF, SX, SHT}

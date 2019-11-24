@@ -2,18 +2,24 @@ defmodule ShEx.ShapeNot do
   @moduledoc false
 
   defstruct [
-    :id,         # shapeExprLabel?
-    :shape_expr  # shapeExpr
+    # shapeExprLabel?
+    :id,
+    # shapeExpr
+    :shape_expr
   ]
 
   defimpl ShEx.ShapeExpression do
     def satisfies(shape_not, graph, schema, association, state) do
-      if match?(%{status: :nonconformant},
-           ShEx.ShapeExpression.satisfies(shape_not.shape_expr, graph, schema, association, state)) do
+      if match?(
+           %{status: :nonconformant},
+           ShEx.ShapeExpression.satisfies(shape_not.shape_expr, graph, schema, association, state)
+         ) do
         ShEx.ShapeMap.Association.conform(association)
       else
-        ShEx.ShapeMap.Association.violation(association,
-          %ShEx.Violation.NegationMatch{shape_not: shape_not})
+        ShEx.ShapeMap.Association.violation(
+          association,
+          %ShEx.Violation.NegationMatch{shape_not: shape_not}
+        )
       end
     end
   end

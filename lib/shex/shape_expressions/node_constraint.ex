@@ -2,12 +2,18 @@ defmodule ShEx.NodeConstraint do
   @moduledoc false
 
   defstruct [
-    :id,             # shapeExprLabel?
-    :node_kind,      # ("iri" | "bnode" | "nonliteral" | "literal")?
-    :datatype,       # IRIREF?
-    :string_facets,  #
-    :numeric_facets, #
-    :values          # [valueSetValue+]?
+    # shapeExprLabel?
+    :id,
+    # ("iri" | "bnode" | "nonliteral" | "literal")?
+    :node_kind,
+    # IRIREF?
+    :datatype,
+    #
+    :string_facets,
+    #
+    :numeric_facets,
+    # [valueSetValue+]?
+    :values
   ]
 
   alias RDF.{IRI, BlankNode, Literal}
@@ -20,12 +26,12 @@ defmodule ShEx.NodeConstraint do
 
   def satisfies(node_constraint, association) do
     node = association.node
+
     with :ok <- node_satisfies_node_kind_constraint(node_constraint.node_kind, node),
          :ok <- node_satisfies_datatype_constraint(node_constraint.datatype, node),
          :ok <- ShEx.NodeConstraint.StringFacets.satisfies(node_constraint.string_facets, node),
          :ok <- ShEx.NodeConstraint.NumericFacets.satisfies(node_constraint.numeric_facets, node),
-         :ok <- ShEx.NodeConstraint.Values.satisfies(node_constraint.values, node)
-    do
+         :ok <- ShEx.NodeConstraint.Values.satisfies(node_constraint.values, node) do
       ShEx.ShapeMap.Association.conform(association)
     else
       violation ->
@@ -40,9 +46,9 @@ defmodule ShEx.NodeConstraint do
   defp node_satisfies_node_kind_constraint("literal", %Literal{}), do: :ok
   defp node_satisfies_node_kind_constraint("nonliteral", %IRI{}), do: :ok
   defp node_satisfies_node_kind_constraint("nonliteral", %BlankNode{}), do: :ok
+
   defp node_satisfies_node_kind_constraint(node_kind, node),
     do: %ShEx.Violation.NodeKindConstraint{node_kind: node_kind, node: node}
-
 
   defp node_satisfies_datatype_constraint(datatype, node)
   defp node_satisfies_datatype_constraint(nil, _), do: :ok
@@ -57,6 +63,7 @@ defmodule ShEx.NodeConstraint do
 
   defp node_satisfies_datatype_constraint(datatype, %Literal{datatype: @xsd_string} = node) do
     rdf_datatype = RDF.Datatype.get(datatype)
+
     if !is_nil(rdf_datatype) && !is_nil(rdf_datatype.cast(node)) do
       :ok
     else

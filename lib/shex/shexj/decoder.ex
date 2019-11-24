@@ -110,6 +110,7 @@ defmodule ShEx.ShExJ.Decoder do
   defp to_shape_expression(%{type: type} = shape_expression_combinator, options)
        when type in ~w[ShapeOr ShapeAnd] do
     type_mod = Module.concat([ShEx, type])
+
     with {:ok, id} <-
            shape_expression_combinator
            |> Map.get(:id)
@@ -221,6 +222,7 @@ defmodule ShEx.ShExJ.Decoder do
   defp to_triple_expression(%{type: type} = triple_expression_combinator, options)
        when type in ~w[EachOf OneOf] do
     type_mod = Module.concat([ShEx, type])
+
     with {:ok, id} <-
            triple_expression_combinator
            |> Map.get(:id)
@@ -435,6 +437,7 @@ defmodule ShEx.ShExJ.Decoder do
       case __STACKTRACE__ do
         [{:erlang, :binary_to_existing_atom, [bad_property, _], []} | _] ->
           {:error, "invalid ShExJ property: #{bad_property}"}
+
         _ ->
           reraise error, __STACKTRACE__
       end

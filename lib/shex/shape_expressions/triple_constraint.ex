@@ -2,21 +2,34 @@ defmodule ShEx.TripleConstraint do
   @moduledoc false
 
   defstruct [
-    :id,          #	tripleExprLabel?
-    :value_expr,  # shapeExpr?
-    :predicate,   #	IRIREF
-    :inverse,     #	BOOL?
-    :min,         # INTEGER?
-    :max,         # INTEGER?
-    :sem_acts,    # [SemAct+]?
-    :annotations  # [Annotation+]?
+    # 	tripleExprLabel?
+    :id,
+    # shapeExpr?
+    :value_expr,
+    # 	IRIREF
+    :predicate,
+    # 	BOOL?
+    :inverse,
+    # INTEGER?
+    :min,
+    # INTEGER?
+    :max,
+    # [SemAct+]?
+    :sem_acts,
+    # [Annotation+]?
+    :annotations
   ]
 
   import ShEx.TripleExpression.Shared
 
-
-  def matches(%__MODULE__{inverse: true} = triple_constraint, {arcs_in, arcs_out},
-        graph, schema, association, state) do
+  def matches(
+        %__MODULE__{inverse: true} = triple_constraint,
+        {arcs_in, arcs_out},
+        graph,
+        schema,
+        association,
+        state
+      ) do
     with {:ok, matched, remainder} <-
            matches(triple_constraint, arcs_in, graph, schema, association, state) do
       {:ok, matched, {remainder, arcs_out}}
@@ -34,9 +47,12 @@ defmodule ShEx.TripleConstraint do
     with {matched, mismatched, remainder, violations} <-
            find_matches(triples, triple_constraint, graph, schema, association, state),
          :ok <-
-           check_cardinality(length(matched),
-             ShEx.TripleExpression.min_cardinality(triple_constraint), triple_constraint, violations)
-    do
+           check_cardinality(
+             length(matched),
+             ShEx.TripleExpression.min_cardinality(triple_constraint),
+             triple_constraint,
+             violations
+           ) do
       {:ok, matched, mismatched ++ remainder}
     else
       violation ->
@@ -60,52 +76,73 @@ defmodule ShEx.TripleConstraint do
   defp do_find_matches({_, _, [], _} = acc, _, _, _, _, _), do: acc
 
   defp do_find_matches({matched, _, _, _} = acc, _, _, _, max, _)
-    when length(matched) == max, do: acc
+       when length(matched) == max,
+       do: acc
 
   defp do_find_matches(
          {matched, mismatched, [{_, predicate, _} = statement | remainder], violations},
-         nil, predicate, inverse, max, match_context) do
+         nil,
+         predicate,
+         inverse,
+         max,
+         match_context
+       ) do
     {[statement | matched], mismatched, remainder, violations}
     |> do_find_matches(nil, predicate, inverse, max, match_context)
   end
 
   defp do_find_matches(
-         {matched, mismatched, [{subject, predicate, object} = statement | remainder], violations},
-         value_expr, predicate, inverse, max,
-         {graph, schema, _association, state} = match_context) do
-      value = if inverse, do: subject, else: object
+         {matched, mismatched, [{subject, predicate, object} = statement | remainder],
+          violations},
+         value_expr,
+         predicate,
+         inverse,
+         max,
+         {graph, schema, _association, state} = match_context
+       ) do
+    value = if inverse, do: subject, else: object
 
-      ShEx.ShapeExpression.satisfies(
-               value_expr,
-               graph,
-               schema,
-               ShEx.ShapeMap.Association.new(value, value_expr),
-               state)
-      |> case do
-           %{status: :conformant} ->
-             {[statement | matched], mismatched, remainder, violations}
+    ShEx.ShapeExpression.satisfies(
+      value_expr,
+      graph,
+      schema,
+      ShEx.ShapeMap.Association.new(value, value_expr),
+      state
+    )
+    |> case do
+      %{status: :conformant} ->
+        {[statement | matched], mismatched, remainder, violations}
 
-           %{status: :nonconformant} = nonconformant ->
-             {matched, [statement | mismatched], remainder, violations ++
-               List.wrap(nonconformant.reason)}
-         end
-      |> do_find_matches(value_expr, predicate, inverse, max, match_context)
-  end
-
-  defp do_find_matches({matched, mismatched, [statement | remainder], violations},
-         value_expr, predicate, inverse, max, match_context) do
-    {matched, [statement | mismatched], remainder, violations}
+      %{status: :nonconformant} = nonconformant ->
+        {matched, [statement | mismatched], remainder,
+         violations ++
+           List.wrap(nonconformant.reason)}
+    end
     |> do_find_matches(value_expr, predicate, inverse, max, match_context)
   end
 
+  defp do_find_matches(
+         {matched, mismatched, [statement | remainder], violations},
+         value_expr,
+         predicate,
+         inverse,
+         max,
+         match_context
+       ) do
+    {matched, [statement | mismatched], remainder, violations}
+    |> do_find_matches(value_expr, predicate, inverse, max, match_context)
+  end
 
   defimpl ShEx.TripleExpression do
     def matches(triple_constraint, triples, graph, schema, association, state) do
       ShEx.TripleConstraint.matches(triple_constraint, triples, graph, schema, association, state)
     end
 
-    def min_cardinality(triple_constraint), do: ShEx.TripleExpression.Shared.min_cardinality(triple_constraint)
-    def max_cardinality(triple_constraint), do: ShEx.TripleExpression.Shared.max_cardinality(triple_constraint)
+    def min_cardinality(triple_constraint),
+      do: ShEx.TripleExpression.Shared.min_cardinality(triple_constraint)
+
+    def max_cardinality(triple_constraint),
+      do: ShEx.TripleExpression.Shared.max_cardinality(triple_constraint)
 
     def predicates(%ShEx.TripleConstraint{predicate: predicate}, _), do: [predicate]
 

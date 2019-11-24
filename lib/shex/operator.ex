@@ -6,18 +6,18 @@ defmodule ShEx.Operator.Shared do
       operator
       |> ShEx.Operator.children()
       |> Enum.reduce_while(:ok, fn
-           child, _ when is_tuple(child) ->
-             case fun.(child) do
-               :ok  -> {:cont, :ok}
-               fail -> {:halt, fail}
-             end
+        child, _ when is_tuple(child) ->
+          case fun.(child) do
+            :ok -> {:cont, :ok}
+            fail -> {:halt, fail}
+          end
 
-           child, _ ->
-             case ShEx.Operator.check(child, fun) do
-               :ok  -> {:cont, :ok}
-               fail -> {:halt, fail}
-             end
-         end)
+        child, _ ->
+          case ShEx.Operator.check(child, fun) do
+            :ok -> {:cont, :ok}
+            fail -> {:halt, fail}
+          end
+      end)
     end
   end
 end

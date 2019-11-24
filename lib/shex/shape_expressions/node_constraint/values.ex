@@ -6,24 +6,28 @@ defmodule ShEx.NodeConstraint.Values do
   @wildcard %{type: "Wildcard"}
   def wildcard(), do: @wildcard
 
-
   def new(values_constraints) when is_list(values_constraints) do
     Enum.map(values_constraints, &normalize_value_constraint/1)
   end
 
   def new(nil), do: nil
 
-  defp normalize_value_constraint(%{type: "LiteralStemRange", exclusions: exclusions} = stem_range) do
+  defp normalize_value_constraint(
+         %{type: "LiteralStemRange", exclusions: exclusions} = stem_range
+       ) do
     # TODO: instead of checking for the presence of exclusions, we maybe want to normalize StemRange to a Stem?
-    %{stem_range | exclusions: exclusions && Enum.map(exclusions, fn
-        string when is_binary(string) -> Literal.new(string)
-        exclusion -> exclusion
-      end)
+    %{
+      stem_range
+      | exclusions:
+          exclusions &&
+            Enum.map(exclusions, fn
+              string when is_binary(string) -> Literal.new(string)
+              exclusion -> exclusion
+            end)
     }
   end
 
   defp normalize_value_constraint(value_constraint), do: value_constraint
-
 
   def satisfies(nil, _), do: :ok
   def satisfies([], _), do: :ok
@@ -31,13 +35,14 @@ defmodule ShEx.NodeConstraint.Values do
   def satisfies(values, node) do
     Enum.reduce_while(values, [], fn value, violations ->
       case satisfies_value(value, node) do
-        :ok       -> {:halt, :ok}
+        :ok -> {:halt, :ok}
         violation -> {:cont, [violation | violations]}
       end
     end)
   end
 
   def satisfies_value(%IRI{} = node, node), do: :ok
+
   def satisfies_value(%IRI{} = iri, node) do
     %ShEx.Violation.ValuesConstraint{
       constraint_type: :object_value,
@@ -47,6 +52,7 @@ defmodule ShEx.NodeConstraint.Values do
   end
 
   def satisfies_value(%Literal{} = node, node), do: :ok
+
   def satisfies_value(%Literal{} = literal, node) do
     %ShEx.Violation.ValuesConstraint{
       constraint_type: :object_value,
@@ -91,7 +97,7 @@ defmodule ShEx.NodeConstraint.Values do
         }
 
       type != "LanguageStemRange" and
-      Enum.any?(stem_range.exclusions, fn exclusion -> node_in?(exclusion, node) end) ->
+          Enum.any?(stem_range.exclusions, fn exclusion -> node_in?(exclusion, node) end) ->
         %ShEx.Violation.ValuesConstraint{
           constraint_type: :exclusion,
           constraint_value: stem_range.exclusions,
@@ -99,20 +105,22 @@ defmodule ShEx.NodeConstraint.Values do
         }
 
       type == "LanguageStemRange" and
-      Enum.any?(stem_range.exclusions, fn
-        excluded_lang_tag when is_binary(excluded_lang_tag) ->
-          # objectValues should be treated as language tags
-          match_language?(node, excluded_lang_tag)
-        exclusion ->
-          node_in?(exclusion, node)
-      end) ->
+          Enum.any?(stem_range.exclusions, fn
+            excluded_lang_tag when is_binary(excluded_lang_tag) ->
+              # objectValues should be treated as language tags
+              match_language?(node, excluded_lang_tag)
+
+            exclusion ->
+              node_in?(exclusion, node)
+          end) ->
         %ShEx.Violation.ValuesConstraint{
           constraint_type: :exclusion,
           constraint_value: stem_range.exclusions,
           node: node
         }
 
-      true -> :ok
+      true ->
+        :ok
     end
   end
 
@@ -138,6 +146,7 @@ defmodule ShEx.NodeConstraint.Values do
   defp node_in?(_, _), do: false
 
   defp match_language?(%Literal{language: language}, ""), do: not is_nil(language)
+
   defp match_language?(%Literal{language: language}, expected_language),
     do: language == String.downcase(expected_language)
 end

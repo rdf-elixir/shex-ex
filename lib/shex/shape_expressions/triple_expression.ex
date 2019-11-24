@@ -1,7 +1,7 @@
 defprotocol ShEx.TripleExpression do
   @moduledoc !"""
-  Triple expressions are used for defining patterns composed of triple constraints.
-  """
+             Triple expressions are used for defining patterns composed of triple constraints.
+             """
 
   @doc """
   Asserts that a triple expression is matched by a set of triples that come from the neighbourhood of a node in an RDF graph.
@@ -37,14 +37,14 @@ defmodule ShEx.TripleExpression.Shared do
 
   def triple_constraints_of_group(group, state) do
     group.expressions
-    |> Enum.flat_map(&(ShEx.TripleExpression.triple_constraints(&1, state)))
+    |> Enum.flat_map(&ShEx.TripleExpression.triple_constraints(&1, state))
     |> MapSet.new()
     |> MapSet.to_list()
   end
 
   def predicates_of_group(group, state) do
     group.expressions
-    |> Enum.flat_map(&(ShEx.TripleExpression.predicates(&1, state)))
+    |> Enum.flat_map(&ShEx.TripleExpression.predicates(&1, state))
     |> MapSet.new()
   end
 
@@ -53,18 +53,18 @@ defmodule ShEx.TripleExpression.Shared do
       expression
       |> ShEx.TripleExpression.required_arcs(state)
       |> case do
-          {:ok, first_arcs_type} when is_nil(first_arcs_type) ->
-            {:cont, {:ok, {arcs_type}}}
+        {:ok, first_arcs_type} when is_nil(first_arcs_type) ->
+          {:cont, {:ok, {arcs_type}}}
 
-          {:ok, ^arcs_type} ->
-            {:cont, {:ok, {arcs_type}}}
+        {:ok, ^arcs_type} ->
+          {:cont, {:ok, {arcs_type}}}
 
-          {:ok, _} ->
-            {:halt, {:ok, {:arcs_in, :arcs_out}}}
+        {:ok, _} ->
+          {:halt, {:ok, {:arcs_in, :arcs_out}}}
 
-          {:error, _} = error ->
-            {:halt, error}
-        end
+        {:error, _} = error ->
+          {:halt, error}
+      end
     end)
   end
 end

@@ -46,19 +46,20 @@ defmodule ShEx.ShapeMap do
 
     @type status :: :conformant | :nonconformant | nil
 
-
     @doc false
     def new(association)
 
     def new(association)
     # This is for the JSON-encoded ShapeMap format from the test suite
     def new({node, %{"shape" => shape, "result" => result}}) do
-      %__MODULE__{new(node, shape) |
-        status: if result == false do
-          :nonconformant
-        else
-          :conformant
-        end
+      %__MODULE__{
+        new(node, shape)
+        | status:
+            if result == false do
+              :nonconformant
+            else
+              :conformant
+            end
       }
     end
 
@@ -75,15 +76,15 @@ defmodule ShEx.ShapeMap do
     def new(node, shape) do
       %__MODULE__{
         node: coerce_node(node),
-        shape: coerce_shape(shape),
+        shape: coerce_shape(shape)
       }
     end
 
     defp coerce_node({subject, predicate, object}) do
       {
-        (if subject in [:focus, :_], do: subject, else: RDF.Statement.coerce_subject(subject)),
+        if(subject in [:focus, :_], do: subject, else: RDF.Statement.coerce_subject(subject)),
         RDF.Statement.coerce_predicate(predicate),
-        (if object in [:focus, :_], do: object, else: RDF.Statement.coerce_object(object)),
+        if(object in [:focus, :_], do: object, else: RDF.Statement.coerce_object(object))
       }
     end
 
@@ -135,22 +136,25 @@ defmodule ShEx.ShapeMap do
 
     @doc false
     def conform(association)
+
     def conform(%__MODULE__{status: nil} = association),
       do: %__MODULE__{association | status: :conformant}
+
     def conform(%__MODULE__{} = association),
       do: association
 
     @doc false
     def violation(%__MODULE__{} = association, reasons, app_infos \\ nil) do
-      %__MODULE__{association |
-        status: :nonconformant,
-        reason:
-          if is_list(reasons) do
-            reasons ++ List.wrap(association.reason)
-          else
-            [reasons | List.wrap(association.reason)]
-          end
-        # TODO: save app_infos
+      %__MODULE__{
+        association
+        | status: :nonconformant,
+          reason:
+            if is_list(reasons) do
+              reasons ++ List.wrap(association.reason)
+            else
+              [reasons | List.wrap(association.reason)]
+            end
+          # TODO: save app_infos
       }
     end
   end
@@ -170,7 +174,7 @@ defmodule ShEx.ShapeMap do
   Creates an ShapeMap with the `associations` given as an enumerable.
   """
   def new(associations) do
-     Enum.reduce(associations, new(), &(add(&2, &1)))
+    Enum.reduce(associations, new(), &add(&2, &1))
   end
 
   @doc """
@@ -190,7 +194,7 @@ defmodule ShEx.ShapeMap do
   def decode!(content, opts \\ []) do
     case decode(content, opts) do
       {:ok, shape_map} -> shape_map
-      {:error, error}  -> raise error
+      {:error, error} -> raise error
     end
   end
 
@@ -212,7 +216,7 @@ defmodule ShEx.ShapeMap do
   def add(shape_map, associations)
 
   def add(shape_map, associations) when is_list(associations) do
-    Enum.reduce(associations, shape_map, &(add(&2, &1)))
+    Enum.reduce(associations, shape_map, &add(&2, &1))
   end
 
   def add(shape_map, {node, associations}) when is_list(associations) do
@@ -223,25 +227,29 @@ defmodule ShEx.ShapeMap do
 
   def add(shape_map, association) do
     association = Association.new(association)
+
     shape_map
     |> Map.update!(association.status || :conformant, fn
-         nil  -> [association]
-         list -> [association | list]
-       end)
+      nil -> [association]
+      list -> [association | list]
+    end)
     |> update_type(association)
   end
 
-  defp update_type((%__MODULE__{type: :fixed, nonconformant: nonconformant}) = shape_map, _)
-    when is_list(nonconformant) and length(nonconformant) > 0,
-    do: %__MODULE__{shape_map | type: :result}
+  defp update_type(%__MODULE__{type: :fixed, nonconformant: nonconformant} = shape_map, _)
+       when is_list(nonconformant) and length(nonconformant) > 0,
+       do: %__MODULE__{shape_map | type: :result}
 
-  defp update_type((%__MODULE__{type: :query, nonconformant: nonconformant}), _)
-    when is_list(nonconformant) and length(nonconformant) > 0,
-    do: raise "a result shape map can not contain triple patterns"
+  defp update_type(%__MODULE__{type: :query, nonconformant: nonconformant}, _)
+       when is_list(nonconformant) and length(nonconformant) > 0,
+       do: raise("a result shape map can not contain triple patterns")
 
-  defp update_type((%__MODULE__{type: :fixed}) = shape_map,
-                   %Association{node: node} = association) when is_tuple(node),
-    do: %__MODULE__{shape_map | type: :query} |> update_type(association)
+  defp update_type(
+         %__MODULE__{type: :fixed} = shape_map,
+         %Association{node: node} = association
+       )
+       when is_tuple(node),
+       do: %__MODULE__{shape_map | type: :query} |> update_type(association)
 
   defp update_type(shape_map, _), do: shape_map
 
@@ -295,11 +303,10 @@ defmodule ShEx.ShapeMap do
 
   def to_fixed(%__MODULE__{type: :query} = shape_map, graph) do
     {:ok,
-      shape_map
-      |> Stream.flat_map(&(resolve_triple_pattern(&1, graph)))
-      |> MapSet.new()
-      |> new()
-    }
+     shape_map
+     |> Stream.flat_map(&resolve_triple_pattern(&1, graph))
+     |> MapSet.new()
+     |> new()}
   end
 
   def to_fixed(%__MODULE__{type: :fixed} = shape_map, _),
@@ -308,7 +315,10 @@ defmodule ShEx.ShapeMap do
   def to_fixed(%__MODULE__{type: :result}, _),
     do: {:error, "a result shape map is not convertible to a fixed shape map"}
 
-  defp resolve_triple_pattern(%ShEx.ShapeMap.Association{node: triple_pattern, shape: shape}, graph)
+  defp resolve_triple_pattern(
+         %ShEx.ShapeMap.Association{node: triple_pattern, shape: shape},
+         graph
+       )
        when is_tuple(triple_pattern) do
     triple_pattern
     |> do_resolve_triple_pattern(graph)
@@ -321,18 +331,18 @@ defmodule ShEx.ShapeMap do
   defp do_resolve_triple_pattern({:focus, predicate, :_}, graph) do
     graph
     |> Stream.map(fn
-         {subject, ^predicate, _} -> subject
-         _ -> nil
-       end)
+      {subject, ^predicate, _} -> subject
+      _ -> nil
+    end)
     |> post_process_query()
   end
 
   defp do_resolve_triple_pattern({:_, predicate, :focus}, graph) do
     graph
     |> Stream.map(fn
-         {_, ^predicate, object} -> object
-         _ -> nil
-       end)
+      {_, ^predicate, object} -> object
+      _ -> nil
+    end)
     |> post_process_query()
   end
 

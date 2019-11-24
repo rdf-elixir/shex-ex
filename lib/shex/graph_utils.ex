@@ -1,11 +1,11 @@
 defmodule ShEx.GraphUtils do
   @moduledoc !"""
-  A set of utility functions for access RDF graphs.
-  """
+             A set of utility functions for accessing RDF graphs.
+             """
 
   @doc !"""
-  the set of triples in a graph with the given subject
-  """
+       the set of triples in a graph with the given subject
+       """
   def arcs_out(graph, node)
 
   def arcs_out(_, %RDF.Literal{}), do: []
@@ -19,14 +19,14 @@ defmodule ShEx.GraphUtils do
   end
 
   @doc !"""
-  the set of triples in a graph with the given object
-  """
+       the set of triples in a graph with the given object
+       """
   def arcs_in(graph, node) do
     # TODO: This heavily used function is very slow.
     graph
     |> Enum.filter(fn
-         {_, _, ^node} -> true
-         _             -> false
-       end)
+      {_, _, ^node} -> true
+      _ -> false
+    end)
   end
 end

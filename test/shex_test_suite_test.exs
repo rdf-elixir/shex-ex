@@ -10,11 +10,11 @@ defmodule ShEx.TestSuiteTest do
       ]
       |> Enum.each(fn test_subject ->
         if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: Retaining nested AND"
+          do: @tag(skip: "TODO: Retaining nested AND")
       end)
 
       if RDF.iri(SHT.Import) in TestSuite.test_case_traits(test_case),
-         do: @tag skip: "TODO: Imports"
+        do: @tag(skip: "TODO: Imports")
 
       @tag test_case: test_case
       test TestSuite.test_case_title(test_case), %{test_case: test_case} do
@@ -41,7 +41,6 @@ defmodule ShEx.TestSuiteTest do
     end
   end
 
-
   describe "negativeSyntax" do
     # These tests violate the ShEx2 grammar
     TestSuite.test_cases("negativeSyntax")
@@ -62,7 +61,6 @@ defmodule ShEx.TestSuiteTest do
     end
   end
 
-
   describe "negativeStructure" do
     TestSuite.test_cases("negativeStructure")
     |> Enum.each(fn test_case ->
@@ -74,11 +72,11 @@ defmodule ShEx.TestSuiteTest do
         "Cycle1Negation3",
         "Cycle2Negation",
         "TwoNegation",
-        "TwoNegation2",
+        "TwoNegation2"
       ]
       |> Enum.each(fn test_subject ->
         if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-           do: @tag skip: "TODO: "
+          do: @tag(skip: "TODO: ")
       end)
 
       @tag test_case: test_case
@@ -97,7 +95,6 @@ defmodule ShEx.TestSuiteTest do
     end
   end
 
-
   @validation_manifest ShEx.TestSuite.manifest_graph("validation")
   @validation_base_iri "https://raw.githubusercontent.com/shexSpec/shexTest/master/validation/manifest" # TODO: This should be the @validation_manifest.base_iri
 
@@ -107,39 +104,38 @@ defmodule ShEx.TestSuiteTest do
     # These tests should raise errors when parsed, noting the rule about nested ValueAnd and ValueOr expressions.
     TestSuite.test_cases(@validation_manifest, suite_type: "validation")
     |> Enum.each(fn test_case ->
-
-#      [
-#        "3circRefS123-Icirc",
-#        "2RefS1-IS2",
-#        "2RefS1-Icirc",
-#        "2RefS2-IS1",
-#        "3circRefS1-IS23",
-#        "3circRefS1-IS2-IS3",
-#        "3circRefS3",
-#        "3circRefS3-IS12",
-#        "3circRefS123",
-#        "3circRefS123-Icirc",
-#        "3circRefS1-Icirc",
-#        "3circRefS1-IS2-IS3-IS3",
-#      ]
+      #      [
+      #        "3circRefS123-Icirc",
+      #        "2RefS1-IS2",
+      #        "2RefS1-Icirc",
+      #        "2RefS2-IS1",
+      #        "3circRefS1-IS23",
+      #        "3circRefS1-IS2-IS3",
+      #        "3circRefS3",
+      #        "3circRefS3-IS12",
+      #        "3circRefS123",
+      #        "3circRefS123-Icirc",
+      #        "3circRefS1-Icirc",
+      #        "3circRefS1-IS2-IS3-IS3",
+      #      ]
       if RDF.iri(SHT.Import) in TestSuite.test_case_traits(test_case),
-        do: @tag skip: "TODO: imports"
+        do: @tag(skip: "TODO: imports")
 
-#      [
-#        "shapeExtern",
-#      ]
+      #      [
+      #        "shapeExtern",
+      #      ]
       # Note that all tests with this trait have also the SemanticAction trait
       if RDF.iri(SHT.ExternalShape) in TestSuite.test_case_traits(test_case),
-        do: @tag skip: "TODO: external shapes"
+        do: @tag(skip: "TODO: external shapes")
 
-#      [
-#        "startCode1fail_abort",
-#        "startCode1startReffail_abort",
-#        "open3groupdotcloseCode1-p1p2p3",
-#        "1dotCode3fail_abort",
-#      ]
+      #      [
+      #        "startCode1fail_abort",
+      #        "startCode1startReffail_abort",
+      #        "open3groupdotcloseCode1-p1p2p3",
+      #        "1dotCode3fail_abort",
+      #      ]
       if RDF.iri(SHT.SemanticAction) in TestSuite.test_case_traits(test_case),
-         do: @tag skip: "TODO: semantic actions"
+        do: @tag(skip: "TODO: semantic actions")
 
       [
         "1literalTotaldigits_pass-byte-short",
@@ -170,29 +166,29 @@ defmodule ShEx.TestSuiteTest do
         "nonPositiveInteger-1a_fail",
         "nonPositiveInteger-p1_fail",
         "nonPositiveInteger-1_fail",
-        "nonPositiveInteger-a1_fail",
+        "nonPositiveInteger-a1_fail"
       ]
       |> Enum.each(fn test_subject ->
-          if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-             do: @tag skip: "TODO: unsupported datatype"
+        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+          do: @tag(skip: "TODO: unsupported datatype")
       end)
 
       [
         "nPlus1",
-        "PTstar-greedy-fail",
+        "PTstar-greedy-fail"
       ]
       |> Enum.each(fn test_subject ->
-          if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-             do: @tag skip: "TODO: greedy"
+        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+          do: @tag(skip: "TODO: greedy")
       end)
 
       [
         "1literalPattern_with_ascii_boundaries_fail",
-        "1literalPattern_with_all_controls_fail",
+        "1literalPattern_with_all_controls_fail"
       ]
       |> Enum.each(fn test_subject ->
-          if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-             do: @tag skip: "TODO: non-ascii character handling"
+        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
+          do: @tag(skip: "TODO: non-ascii character handling")
       end)
 
       @tag test_case: test_case
@@ -208,7 +204,7 @@ defmodule ShEx.TestSuiteTest do
 
       schema_file =
         test_case_action
-        |> RDF.Description.first(SHT.schema)
+        |> RDF.Description.first(SHT.schema())
         |> ShEx.TestSuite.file()
 
       assert {:ok, schema} =
@@ -217,6 +213,7 @@ defmodule ShEx.TestSuiteTest do
                |> ShEx.ShExC.Decoder.decode(base: @validation_base_iri)
 
       shexj_schema_file = String.replace_trailing(schema_file, "shex", "json")
+
       if File.exists?(shexj_schema_file) do
         assert {:ok, shexj_schema} =
                  shexj_schema_file
@@ -225,22 +222,22 @@ defmodule ShEx.TestSuiteTest do
 
         # TODO: The schemas for these seem to be different ... see also "schemas" tests
         test_case_name = TestSuite.test_case_name(test_case)
+
         unless String.starts_with?(test_case_name, "FocusIRI2groupBnodeNested2groupIRIRef") or
-               String.starts_with?(test_case_name, "FocusIRI2EachBnodeNested2EachIRIRef")
-        do
+                 String.starts_with?(test_case_name, "FocusIRI2EachBnodeNested2EachIRIRef") do
           assert shexj_schema == schema
         end
       end
 
       assert {:ok, graph} =
                test_case_action
-               |> RDF.Description.first(SHT.data)
+               |> RDF.Description.first(SHT.data())
                |> ShEx.TestSuite.file()
                |> RDF.Turtle.read_file(base: @validation_base_iri)
 
       shape_map_file =
         test_case_action
-        |> RDF.Description.first(SHT.map)
+        |> RDF.Description.first(SHT.map())
         |> ShEx.TestSuite.file()
 
       map =
@@ -249,21 +246,22 @@ defmodule ShEx.TestSuiteTest do
                    shape_map_file
                    |> File.read!()
                    |> ShEx.ShapeMap.from_json()
+
           shape_map
         else
           shape =
             if RDF.iri(SHT.Start) in TestSuite.test_case_traits(test_case),
-               do: :start,
-               else: RDF.Description.first(test_case_action, SHT.shape)
-          ShEx.ShapeMap.new(%{
-            RDF.Description.first(test_case_action, SHT.focus) => shape})
+              do: :start,
+              else: RDF.Description.first(test_case_action, SHT.shape())
+
+          ShEx.ShapeMap.new(%{RDF.Description.first(test_case_action, SHT.focus()) => shape})
         end
 
-      result = RDF.Description.first(test_case, MF.result)
+      result = RDF.Description.first(test_case, MF.result())
 
       shape_externs =
         test_case_action
-        |> RDF.Description.first(SHT.shapeExterns)
+        |> RDF.Description.first(SHT.shapeExterns())
         |> ShEx.TestSuite.file()
 
       external_shape =
@@ -285,8 +283,11 @@ defmodule ShEx.TestSuiteTest do
       assert %ShEx.ShapeMap{} = result = ShEx.validate(graph, schema, shape_map)
 
       case type do
-        "ValidationTest"    -> assert ShEx.ShapeMap.conformant?(result)
-        "ValidationFailure" -> refute ShEx.ShapeMap.conformant?(result)
+        "ValidationTest" ->
+          assert ShEx.ShapeMap.conformant?(result)
+
+        "ValidationFailure" ->
+          refute ShEx.ShapeMap.conformant?(result)
       end
     end
 

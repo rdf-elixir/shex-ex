@@ -26,5 +26,4 @@ defmodule ShEx.Utils do
 
   def if_present(nil, _, _), do: {:ok, nil}
   def if_present(value, fun, options), do: fun.(value, options)
-
 end
