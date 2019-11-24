@@ -56,7 +56,7 @@ defmodule ShEx.MixProject do
 
   defp deps do
     [
-      {:rdf, "~> 0.6.1"},
+      {:rdf, "~> 0.7"},
       {:flow, "~> 0.14"},
       {:jason, "~> 1.1"},
 

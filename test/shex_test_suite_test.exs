@@ -96,7 +96,7 @@ defmodule ShEx.TestSuiteTest do
   end
 
   @validation_manifest ShEx.TestSuite.manifest_graph("validation")
-  @validation_base_iri "https://raw.githubusercontent.com/shexSpec/shexTest/master/validation/manifest" # TODO: This should be the @validation_manifest.base_iri
+  @validation_base_iri @validation_manifest.base_iri
 
   def validation_manifest, do: @validation_manifest
 
