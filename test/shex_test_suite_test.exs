@@ -138,42 +138,6 @@ defmodule ShEx.TestSuiteTest do
         do: @tag(skip: "TODO: semantic actions")
 
       [
-        "1literalTotaldigits_pass-byte-short",
-        "1literalTotaldigits_pass-byte-equal",
-        "1literalTotaldigits_fail-byte-long",
-        "1literalTotaldigits_fail-float-equal",
-        "1literalFractiondigits_fail-float-equal",
-        "byte-n129_fail",
-        "byte-128_fail",
-        "byte-empty_fail",
-        "short-n32769_fail",
-        "short-32768_fail",
-        "float-pINF_fail",
-        "float-empty_fail",
-        "unsignedLong-n1_fail",
-        "unsignedByte-n1_fail",
-        "unsignedByte-256_fail",
-        "unsignedShort-65536_fail",
-        "unsignedShort-n1_fail",
-        "unsignedInt-n1_fail",
-        "positiveInteger-n1_fail",
-        "positiveInteger-0_fail",
-        "nonNegativeInteger-n1_fail",
-        "negativeInteger-0_fail",
-        "negativeInteger-1_fail",
-        "negativeInteger-n0_fail",
-        "negativeInteger-p0_fail",
-        "nonPositiveInteger-1a_fail",
-        "nonPositiveInteger-p1_fail",
-        "nonPositiveInteger-1_fail",
-        "nonPositiveInteger-a1_fail"
-      ]
-      |> Enum.each(fn test_subject ->
-        if test_case |> TestSuite.test_case_name() |> String.starts_with?(test_subject),
-          do: @tag(skip: "TODO: unsupported datatype")
-      end)
-
-      [
         "nPlus1",
         "PTstar-greedy-fail"
       ]

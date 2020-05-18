@@ -27,8 +27,7 @@ The API documentation can be found [here](https://hexdocs.pm/shex/). For a guide
     - external shapes
     - annotations
     - semantic actions
-- only the [currently datatypes supported by RDF.ex](https://rdf-elixir.dev/rdf-ex/literals.html#typed-literals) are supported in datatype and numeric facet constraints
-- greedy
+- greedy matching
 - non-ascii characters in regular expressions are not fully supported yet
 
 
