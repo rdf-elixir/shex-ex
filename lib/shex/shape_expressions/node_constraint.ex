@@ -16,10 +16,8 @@ defmodule ShEx.NodeConstraint do
     :values
   ]
 
-  alias RDF.{IRI, BlankNode, Literal}
-  alias RDF.NS.XSD
+  alias RDF.{IRI, BlankNode, Literal, XSD, NS}
 
-  @xsd_string XSD.string()
   @node_kinds ~w[iri bnode nonliteral literal]
 
   def node_kinds(), do: @node_kinds
@@ -53,21 +51,26 @@ defmodule ShEx.NodeConstraint do
   defp node_satisfies_datatype_constraint(datatype, node)
   defp node_satisfies_datatype_constraint(nil, _), do: :ok
 
-  defp node_satisfies_datatype_constraint(datatype, %Literal{datatype: datatype} = literal) do
-    if Literal.valid?(literal) do
-      :ok
-    else
-      %ShEx.Violation.DatatypeConstraint{datatype: datatype, node: literal}
-    end
-  end
+  defp node_satisfies_datatype_constraint(datatype, %Literal{literal: %XSD.String{}} = node) do
+    rdf_datatype = Literal.Datatype.get(datatype)
 
-  defp node_satisfies_datatype_constraint(datatype, %Literal{datatype: @xsd_string} = node) do
-    rdf_datatype = RDF.Datatype.get(datatype)
-
-    if !is_nil(rdf_datatype) && !is_nil(rdf_datatype.cast(node)) do
+    if rdf_datatype && !is_nil(rdf_datatype.cast(node)) do
       :ok
     else
       %ShEx.Violation.DatatypeConstraint{datatype: datatype, node: node}
+    end
+  end
+
+  defp node_satisfies_datatype_constraint(expected_datatype, %Literal{} = literal) do
+    actual_datatype = Literal.datatype_id(literal)
+
+    if expected_datatype == actual_datatype and Literal.valid?(literal) do
+      :ok
+    else
+      %ShEx.Violation.DatatypeConstraint{
+        datatype: expected_datatype,
+        node: literal
+      }
     end
   end
 

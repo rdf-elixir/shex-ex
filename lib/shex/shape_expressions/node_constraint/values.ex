@@ -145,8 +145,11 @@ defmodule ShEx.NodeConstraint.Values do
   defp node_in?(node, node), do: true
   defp node_in?(_, _), do: false
 
-  defp match_language?(%Literal{language: language}, ""), do: not is_nil(language)
+  defp match_language?(%Literal{literal: %RDF.LangString{language: language}}, ""),
+    do: not is_nil(language)
 
-  defp match_language?(%Literal{language: language}, expected_language),
+  defp match_language?(%Literal{literal: %RDF.LangString{language: language}}, expected_language),
     do: language == String.downcase(expected_language)
+
+  defp match_language?(_, _), do: false
 end

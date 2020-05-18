@@ -3,7 +3,7 @@ defmodule ShEx.ShExC.Decoder do
 
   import ShEx.Utils
 
-  alias RDF.{IRI, BlankNode, Literal}
+  alias RDF.{IRI, BlankNode, Literal, XSD}
   alias ShEx.NodeConstraint.{StringFacets, NumericFacets}
 
   import RDF.Serialization.ParseHelper, only: [error_description: 1]
@@ -470,26 +470,28 @@ defmodule ShEx.ShExC.Decoder do
   end
 
   defp xs_facet({:string_facet, length_type, {:integer, _line, integer}}, _state) do
-    {:ok, %{length_type => integer.value}}
+    {:ok, %{length_type => Literal.value(integer)}}
   end
 
   defp xs_facet({:numeric_length_facet, numeric_length_type, {:integer, _line, integer}}, _state) do
-    {:ok, %{numeric_length_type => integer.value}}
+    {:ok, %{numeric_length_type => Literal.value(integer)}}
   end
 
   defp xs_facet({:numeric_range_facet, numeric_range_type, numeric}, _state) do
-    {:ok, %{numeric_range_type => numeric.value}}
+    {:ok, %{numeric_range_type => Literal.value(numeric)}}
   end
 
   defp validate_numeric_datatype(nil, _), do: {:ok, nil}
   defp validate_numeric_datatype(numeric_facets, nil), do: {:ok, numeric_facets}
 
-  defp validate_numeric_datatype(numeric_facets, datatype) do
-    if RDF.Numeric.type?(datatype) do
+  defp validate_numeric_datatype(numeric_facets, datatype_iri) do
+    datatype = XSD.Datatype.get(datatype_iri)
+
+    if datatype && XSD.Numeric.datatype?(datatype) do
       {:ok, numeric_facets}
     else
       {:error,
-       "numeric facet constraints applied to non-numeric datatype: #{to_string(datatype)}}"}
+       "numeric facet constraints applied to non-numeric datatype: #{to_string(datatype_iri)}}"}
     end
   end
 

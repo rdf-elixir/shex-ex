@@ -15,14 +15,14 @@ defmodule ShEx.NodeConstraintTest do
     ValuesConstraint
   }
 
-  alias RDF.NS.XSD
+  alias RDF.{XSD, NS}
   import RDF.Sigils
 
   @example_iri RDF.iri("http://example.com/")
-  @example_string RDF.string("http://example.com/")
-  @example_integer RDF.integer(42)
-  @example_decimal RDF.decimal(3.14)
-  @example_double RDF.double(3.14)
+  @example_string XSD.string("http://example.com/")
+  @example_integer XSD.integer(42)
+  @example_decimal XSD.decimal(3.14)
+  @example_double XSD.double(3.14)
 
   describe "satisfies/2" do
     test "iri node kind constraint with satisfying node" do
@@ -40,8 +40,8 @@ defmodule ShEx.NodeConstraintTest do
         RDF.bnode(),
         @example_string,
         @example_integer,
-        RDF.true(),
-        RDF.false()
+        XSD.true(),
+        XSD.false()
       ]
       |> Enum.each(fn node ->
         assert %Association{
@@ -67,8 +67,8 @@ defmodule ShEx.NodeConstraintTest do
         @example_iri,
         @example_string,
         @example_integer,
-        RDF.true(),
-        RDF.false()
+        XSD.true(),
+        XSD.false()
       ]
       |> Enum.each(fn node ->
         assert %Association{
@@ -83,8 +83,8 @@ defmodule ShEx.NodeConstraintTest do
       [
         @example_string,
         @example_integer,
-        RDF.true(),
-        RDF.false()
+        XSD.true(),
+        XSD.false()
       ]
       |> Enum.each(fn node ->
         assert %Association{node: ^node, status: :conformant} =
@@ -121,8 +121,8 @@ defmodule ShEx.NodeConstraintTest do
       [
         @example_string,
         @example_integer,
-        RDF.true(),
-        RDF.false()
+        XSD.true(),
+        XSD.false()
       ]
       |> Enum.each(fn node ->
         assert %Association{
@@ -135,11 +135,11 @@ defmodule ShEx.NodeConstraintTest do
 
     test "datatype constraint with satisfying node" do
       [
-        {@example_string, XSD.string()},
-        {@example_integer, XSD.integer()},
-        {RDF.false(), XSD.boolean()},
-        {RDF.true(), XSD.boolean()},
-        {~L"42", XSD.integer()}
+        {@example_string, NS.XSD.string()},
+        {@example_integer, NS.XSD.integer()},
+        {XSD.false(), NS.XSD.boolean()},
+        {XSD.true(), NS.XSD.boolean()},
+        {~L"42", NS.XSD.integer()}
       ]
       |> Enum.each(fn {node, datatype} ->
         assert %Association{node: ^node, status: :conformant} =
@@ -149,13 +149,13 @@ defmodule ShEx.NodeConstraintTest do
 
     test "datatype constraint with unsatisfying node" do
       [
-        {@example_iri, XSD.string()},
-        {RDF.bnode(), XSD.string()},
-        {RDF.true(), XSD.string()},
-        {@example_integer, XSD.string()},
-        {@example_integer, XSD.boolean()},
-        {@example_string, XSD.integer()},
-        {RDF.boolean("10"), XSD.boolean()}
+        {@example_iri, NS.XSD.string()},
+        {RDF.bnode(), NS.XSD.string()},
+        {XSD.true(), NS.XSD.string()},
+        {@example_integer, NS.XSD.string()},
+        {@example_integer, NS.XSD.boolean()},
+        {@example_string, NS.XSD.integer()},
+        {XSD.boolean("10"), NS.XSD.boolean()}
       ]
       |> Enum.each(fn {node, datatype} ->
         assert %Association{
@@ -172,8 +172,8 @@ defmodule ShEx.NodeConstraintTest do
         {~L"foo", %{minlength: 1}},
         {~L"foo", %{minlength: 1, maxlength: 3}},
         {@example_integer, %{length: 2}},
-        {RDF.false(), %{minlength: 2}},
-        {RDF.true(), %{maxlength: 5}},
+        {XSD.false(), %{minlength: 2}},
+        {XSD.true(), %{maxlength: 5}},
         {@example_iri, %{minlength: 3}},
         {RDF.bnode("foo"), %{length: 3}},
         {@example_iri, %{pattern: "example\.com"}},
@@ -247,10 +247,10 @@ defmodule ShEx.NodeConstraintTest do
         {@example_decimal, %{minexclusive: Decimal.from_float(3.14)}},
         {@example_double, %{totaldigits: 3}},
         {@example_double, %{fractiondigits: 3}},
-        {@example_double, %{mininclusive: RDF.double(3.14)}},
+        {@example_double, %{mininclusive: XSD.double(3.14)}},
         {@example_string, %{mininclusive: 1}},
-        {RDF.false(), %{maxinclusive: 1}},
-        {RDF.true(), %{minexclusive: 1}},
+        {XSD.false(), %{maxinclusive: 1}},
+        {XSD.true(), %{minexclusive: 1}},
         {@example_iri, %{maxexclusive: 1}},
         {RDF.bnode("foo"), %{totaldigits: 1}}
       ]
@@ -284,8 +284,8 @@ defmodule ShEx.NodeConstraintTest do
         {~L"foo"en, [%{type: "LiteralStem", stem: "fo"}]},
         {@example_integer, [%{type: "LiteralStem", stem: "4"}]},
         {~L"foo"en, [%{type: "LanguageStem", stem: "en"}]},
-        {RDF.string("foo", language: "de-CH"), [%{type: "LanguageStem", stem: "de"}]},
-        {RDF.string("foo", language: "de-CH"), [%{type: "LanguageStem", stem: "de-ch"}]}
+        {RDF.langString("foo", language: "de-CH"), [%{type: "LanguageStem", stem: "de"}]},
+        {RDF.langString("foo", language: "de-CH"), [%{type: "LanguageStem", stem: "de-ch"}]}
       ]
       |> Enum.each(fn {node, value_set_values} ->
         assert %Association{node: ^node, status: :conformant} =
@@ -408,7 +408,7 @@ defmodule ShEx.NodeConstraintTest do
            exclusions: [%{type: "LiteralStem", stem: "foo-"}]
          }
        ]},
-      {RDF.string("foo", language: "de-CH"),
+      {RDF.langString("foo", language: "de-CH"),
        [
          %{
            type: "LanguageStemRange",
@@ -416,7 +416,7 @@ defmodule ShEx.NodeConstraintTest do
            exclusions: [%{type: "LanguageStem", stem: "de-CH"}]
          }
        ]},
-      {RDF.string("foo", language: "de-CH"),
+      {RDF.langString("foo", language: "de-CH"),
        [%{type: "LanguageStemRange", stem: "de", exclusions: ["de-CH"]}]}
     ]
     |> Enum.each(fn {node, value_set_values} ->

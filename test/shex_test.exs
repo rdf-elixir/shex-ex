@@ -4,6 +4,8 @@ defmodule ShExTest do
 
   import RDF.Sigils
 
+  alias RDF.XSD
+
   @example_data RDF.Turtle.read_string!("""
                 PREFIX ex: <http://ex.example/#>
                 PREFIX inst: <http://example.com/users/>
@@ -117,14 +119,8 @@ defmodule ShExTest do
                 triple_expression_violations: [
                   %ShEx.Violation.NumericFacetConstraint{
                     facet_type: :mininclusive,
-                    facet_value: %RDF.Literal{
-                      value: Decimal.from_float(13.0),
-                      datatype: ~I<http://www.w3.org/2001/XMLSchema#decimal>
-                    },
-                    node: %RDF.Literal{
-                      value: 12,
-                      datatype: ~I<http://www.w3.org/2001/XMLSchema#integer>
-                    }
+                    facet_value: XSD.decimal(13.0),
+                    node: XSD.integer(12)
                   }
                 ]
               }
