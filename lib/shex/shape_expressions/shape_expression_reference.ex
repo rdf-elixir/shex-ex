@@ -18,7 +18,7 @@ defmodule ShEx.ShapeExpressionReference do
         raise """
         Error: Unknown reference #{expr_ref}
         This should have been detected during schema creation.
-        Please raise an issue at https://github.com/marcelotto/shex-ex/issues
+        Please raise an issue at https://github.com/rdf-elixir/shex-ex/issues
         """
     end
   end

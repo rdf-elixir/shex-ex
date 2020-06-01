@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 This version just upgrades to RDF.ex 0.8. With its support for all derived numeric datatypes comes now  
 full support for all datatypes in ShEx.ex. 
 
-[Compare v0.1.2...HEAD](https://github.com/marcelotto/shex-ex/compare/v0.1.2...HEAD)
+[Compare v0.1.2...HEAD](https://github.com/rdf-elixir/shex-ex/compare/v0.1.2...HEAD)
 
 
 
@@ -18,7 +18,7 @@ full support for all datatypes in ShEx.ex.
 
 - Upgrade to RDF.ex 0.7
 
-[Compare v0.1.1...v0.1.2](https://github.com/marcelotto/shex-ex/compare/v0.1.1...v0.1.2)
+[Compare v0.1.1...v0.1.2](https://github.com/rdf-elixir/shex-ex/compare/v0.1.1...v0.1.2)
 
 
 
@@ -42,7 +42,7 @@ full support for all datatypes in ShEx.ex.
 - Resolving queries in a query ShapeMap sometimes failed when queries had no results  
 
 
-[Compare v0.1.0...v0.1.1](https://github.com/marcelotto/shex-ex/compare/v0.1.0...v0.1.1)
+[Compare v0.1.0...v0.1.1](https://github.com/rdf-elixir/shex-ex/compare/v0.1.0...v0.1.1)
 
 
 

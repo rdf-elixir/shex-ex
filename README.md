@@ -2,7 +2,7 @@
 
 # ShEx.ex
 
-[![Travis](https://img.shields.io/travis/marcelotto/shex-ex.svg?style=flat-square)](https://travis-ci.org/marcelotto/shex-ex)
+[![Travis](https://img.shields.io/travis/rdf-elixir/shex-ex.svg?style=flat-square)](https://travis-ci.org/rdf-elixir/shex-ex)
 [![Hex.pm](https://img.shields.io/hexpm/v/shex.svg?style=flat-square)](https://hex.pm/packages/shex)
 
 

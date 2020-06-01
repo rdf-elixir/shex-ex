@@ -1,7 +1,7 @@
 defmodule ShEx.MixProject do
   use Mix.Project
 
-  @repo_url "https://github.com/marcelotto/shex-ex"
+  @repo_url "https://github.com/rdf-elixir/shex-ex"
 
   @version File.read!("VERSION") |> String.trim()
 
@@ -56,7 +56,7 @@ defmodule ShEx.MixProject do
 
   defp deps do
     [
-      {:rdf, github: "marcelotto/rdf-ex"},
+      {:rdf, github: "rdf-elixir/rdf-ex"},
       {:flow, "~> 1.0"},
       {:jason, "~> 1.2"},
 
