@@ -49,7 +49,6 @@ defmodule ShEx.ShapeMap do
     @doc false
     def new(association)
 
-    def new(association)
     # This is for the JSON-encoded ShapeMap format from the test suite
     def new({node, %{"shape" => shape, "result" => result}}) do
       %__MODULE__{

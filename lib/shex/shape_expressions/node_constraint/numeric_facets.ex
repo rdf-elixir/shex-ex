@@ -60,28 +60,28 @@ defmodule ShEx.NodeConstraint.NumericFacets do
   defp satisfies_numeric_mininclusive(nil, _), do: true
 
   defp satisfies_numeric_mininclusive(mininclusive, literal) do
-    XSD.Numeric.compare(literal, mininclusive) in [:gt, :eq] ||
+    RDF.Literal.compare(literal, mininclusive) in [:gt, :eq] ||
       {:violates, :mininclusive, mininclusive}
   end
 
   defp satisfies_numeric_minexclusive(nil, _), do: true
 
   defp satisfies_numeric_minexclusive(minexclusive, literal) do
-    XSD.Numeric.compare(literal, minexclusive) == :gt ||
+    RDF.Literal.compare(literal, minexclusive) == :gt ||
       {:violates, :minexclusive, minexclusive}
   end
 
   defp satisfies_numeric_maxinclusive(nil, _), do: true
 
   defp satisfies_numeric_maxinclusive(maxinclusive, literal) do
-    XSD.Numeric.compare(literal, maxinclusive) in [:lt, :eq] ||
+    RDF.Literal.compare(literal, maxinclusive) in [:lt, :eq] ||
       {:violates, :maxinclusive, maxinclusive}
   end
 
   defp satisfies_numeric_maxexclusive(nil, _), do: true
 
   defp satisfies_numeric_maxexclusive(maxexclusive, literal) do
-    XSD.Numeric.compare(literal, maxexclusive) == :lt ||
+    RDF.Literal.compare(literal, maxexclusive) == :lt ||
       {:violates, :maxexclusive, maxexclusive}
   end
 
