@@ -56,13 +56,13 @@ defmodule ShEx.MixProject do
 
   defp deps do
     [
-      {:rdf, "~> 0.7"},
-      {:flow, "~> 0.14"},
-      {:jason, "~> 1.1"},
+      {:rdf, github: "marcelotto/rdf-ex"},
+      {:flow, "~> 1.0"},
+      {:jason, "~> 1.2"},
 
       # Development
-      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false}
     ]
   end
 

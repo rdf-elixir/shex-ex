@@ -7,10 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## Unreleased
 
-### Changed
-
-- with RDF.ex 0.8 and its support for all derived numeric datatypes comes now  
-  full support for all datatypes in ShEx.ex 
+This version just upgrades to RDF.ex 0.8. With its support for all derived numeric datatypes comes now  
+full support for all datatypes in ShEx.ex. 
 
 [Compare v0.1.2...HEAD](https://github.com/marcelotto/shex-ex/compare/v0.1.2...HEAD)
 
