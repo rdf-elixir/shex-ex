@@ -56,7 +56,7 @@ defmodule ShEx.MixProject do
 
   defp deps do
     [
-      {:rdf, github: "rdf-elixir/rdf-ex"},
+      {:rdf, "~> 0.8"},
       {:flow, "~> 1.0"},
       {:jason, "~> 1.2"},
 

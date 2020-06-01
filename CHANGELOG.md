@@ -5,12 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## v0.1.3 - 2020-06-01
 
 This version just upgrades to RDF.ex 0.8. With its support for all derived numeric datatypes comes now  
-full support for all datatypes in ShEx.ex. 
+full support for all of these datatypes in ShEx.ex. 
 
-[Compare v0.1.2...HEAD](https://github.com/rdf-elixir/shex-ex/compare/v0.1.2...HEAD)
+
+[Compare v0.1.2...v0.1.3](https://github.com/rdf-elixir/shex-ex/compare/v0.1.2...v0.1.3)
 
 
 

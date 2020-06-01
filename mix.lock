@@ -11,5 +11,5 @@
   "makeup_elixir": {:hex, :makeup_elixir, "0.14.1", "4f0e96847c63c17841d42c08107405a005a2680eb9c7ccadfd757bd31dabccfb", [:mix], [{:makeup, "~> 1.0", [hex: :makeup, repo: "hexpm", optional: false]}], "hexpm", "f2438b1a80eaec9ede832b5c41cd4f373b38fd7aa33e3b22d9db79e640cbde11"},
   "nimble_parsec": {:hex, :nimble_parsec, "0.6.0", "32111b3bf39137144abd7ba1cce0914533b2d16ef35e8abc5ec8be6122944263", [:mix], [], "hexpm", "27eac315a94909d4dc68bc07a4a83e06c8379237c5ea528a9acff4ca1c873c52"},
   "protocol_ex": {:hex, :protocol_ex, "0.4.3", "4acbe35da85109dc40315c1139bb7a65ebc7fc102d384cd8b3038384fbb9b282", [:mix], [], "hexpm", "6ca5ddb3505c9c86f17cd3f19838b34bf89966ae17078f79f81983b6a4391fe9"},
-  "rdf": {:git, "https://github.com/rdf-elixir/rdf-ex.git", "83c8b49bc55d119f7bc10e52ad1e486f8fbccb35", []},
+  "rdf": {:hex, :rdf, "0.8.0", "9e797e1120d7eb4285874eb3e293493670d3deddcca8315abec9598ca80ae7d4", [:mix], [{:decimal, "~> 1.5", [hex: :decimal, repo: "hexpm", optional: false]}, {:protocol_ex, "~> 0.4", [hex: :protocol_ex, repo: "hexpm", optional: false]}], "hexpm", "d256e7d35d03dd22ae44850c31d5e7eca77563985b8ba7dbf6d639f7ddadd596"},
 }
