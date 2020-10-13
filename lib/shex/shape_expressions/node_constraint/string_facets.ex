@@ -63,7 +63,7 @@ defmodule ShEx.NodeConstraint.StringFacets do
   end
 
   defp lexical_form(%IRI{value: value}), do: value
-  defp lexical_form(%BlankNode{id: id}), do: id
+  defp lexical_form(%BlankNode{value: value}), do: value
   defp lexical_form(%Literal{} = literal), do: Literal.lexical(literal)
   defp lexical_form(value), do: raise("Invalid node value: #{inspect(value)}}")
 end

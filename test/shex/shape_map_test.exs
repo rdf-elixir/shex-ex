@@ -55,8 +55,8 @@ defmodule ShEx.ShapeMapTest do
                type: :fixed,
                conformant: [
                  %ShapeMap.Association{node: @iri, shape: @shape_label},
-                 %ShapeMap.Association{node: @literal, shape: @shape_label},
-                 %ShapeMap.Association{node: @bnode, shape: @shape_label}
+                 %ShapeMap.Association{node: @bnode, shape: @shape_label},
+                 %ShapeMap.Association{node: @literal, shape: @shape_label}
                ]
              }
     end
