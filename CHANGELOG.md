@@ -5,6 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
+## 0.1.4 - 2020-10-13
+
+This version just upgrades to RDF.ex 0.9.
+
+[Compare v0.1.3...v0.1.4](https://github.com/rdf-elixir/shex-ex/compare/v0.1.3...v0.1.4)
+
+
+
 ## v0.1.3 - 2020-06-01
 
 This version just upgrades to RDF.ex 0.8. With its support for all derived numeric datatypes comes now  
