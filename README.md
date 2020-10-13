@@ -2,7 +2,7 @@
 
 # ShEx.ex
 
-[![Travis](https://img.shields.io/travis/rdf-elixir/shex-ex.svg?style=flat-square)](https://travis-ci.org/rdf-elixir/shex-ex)
+[![CI](https://github.com/rdf-elixir/shex-ex/workflows/CI/badge.svg?branch=master)](https://github.com/rdf-elixir/shex-ex/actions?query=branch%3Amaster+workflow%3ACI)
 [![Hex.pm](https://img.shields.io/hexpm/v/shex.svg?style=flat-square)](https://hex.pm/packages/shex)
 
 
