@@ -446,9 +446,7 @@ defmodule ShEx.ShExC.Decoder do
           else
             {:halt,
              {:error,
-              "multiple occurrences of the same xsFacet: #{
-                conflicts |> Map.keys() |> Enum.join(", ")
-              }}"}}
+              "multiple occurrences of the same xsFacet: #{conflicts |> Map.keys() |> Enum.join(", ")}}"}}
           end
 
         {:error, _} = error ->

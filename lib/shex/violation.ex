@@ -104,9 +104,7 @@ defmodule ShEx.Violation.StringFacetConstraint do
     end
 
     def reason(%{facet_type: :pattern} = violation) do
-      "#{inspect(violation.node)} does not match pattern #{inspect(violation.facet_value.pattern)} with flags #{
-        inspect(violation.facet_value.flags)
-      }"
+      "#{inspect(violation.node)} does not match pattern #{inspect(violation.facet_value.pattern)} with flags #{inspect(violation.facet_value.flags)}"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -148,9 +146,7 @@ defmodule ShEx.Violation.NumericFacetConstraint do
     end
 
     def reason(%{facet_type: :fractiondigits} = violation) do
-      "number of fractional digits of #{inspect(violation.node)} is greater than #{
-        violation.facet_value
-      }"
+      "number of fractional digits of #{inspect(violation.node)} is greater than #{violation.facet_value}"
     end
 
     defdelegate reason_doc(violation), to: ShEx.Violation, as: :reason
@@ -226,9 +222,7 @@ defmodule ShEx.Violation.MinCardinality do
     end
 
     defp main_reason(violation) do
-      "matched #{cardinality(violation.cardinality)} of at least #{
-        ShEx.TripleExpression.min_cardinality(violation.triple_expression)
-      } #{triple_expression_label(violation.triple_expression)}"
+      "matched #{cardinality(violation.cardinality)} of at least #{ShEx.TripleExpression.min_cardinality(violation.triple_expression)} #{triple_expression_label(violation.triple_expression)}"
     end
 
     defp cardinality(0), do: "none"
@@ -272,9 +266,7 @@ defmodule ShEx.Violation.MaxCardinality do
     def label(_), do: "Maximum Cardinality Violation"
 
     def reason(violation) do
-      "Max cardinality (#{ShEx.TripleExpression.max_cardinality(violation.triple_expression)}) of #{
-        triple_expression_label(violation.triple_expression)
-      } exceeded"
+      "Max cardinality (#{ShEx.TripleExpression.max_cardinality(violation.triple_expression)}) of #{triple_expression_label(violation.triple_expression)} exceeded"
     end
 
     defp triple_expression_label(%ShEx.TripleConstraint{} = triple_constraint) do
